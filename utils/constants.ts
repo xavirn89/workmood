@@ -1,5 +1,5 @@
 export const stateName: Record<number, string> = {
-  0: 'Pomodoro',
+  0: 'Work',
   1: 'Short Break',
   2: 'Long Break'
 }

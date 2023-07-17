@@ -33,9 +33,6 @@ export const getTimeValue = (inputSeconds: number, format: 'minutes' | 'seconds'
   }
 }
 
-
-
-
 export const extractYouTubeVideoId = (url: string): string => {
   const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/
   const match = url.match(regExp)
