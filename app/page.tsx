@@ -1,14 +1,18 @@
 'use client'
 import { ChangeEvent, useState, useRef, useEffect } from 'react'
 import { FaPlay, FaPause, FaUndo, FaForward } from 'react-icons/fa'
+import { BsGearFill } from 'react-icons/bs'
+import { IoThunderstormSharp, IoCloudyNight } from 'react-icons/io5'
+import { GiBigWave } from 'react-icons/gi'
+import { MdForest } from 'react-icons/md'
 import YouTube from 'react-youtube'
 
-import { formatTime, extractYouTubeVideoId } from '@/utils/functions'
-import { timers, stateName, playerOptions } from '@/utils/constants'
+import { formatTime, extractYouTubeVideoId , getTimeValue} from '@/utils/functions'
+import { timers, stateName } from '@/utils/constants'
 import YoutubeInput from '@/components/YoutubeInput'
 import Button from '@/components/Button'
 
-const Home = () => {
+const Test = () => {
   const [state, setState] = useState<number>(0)
   const [currentTimer, setCurrentTimer] = useState<number>(timers[0])
   const [timerActive, setTimerActive] = useState<boolean>(false)
@@ -22,6 +26,14 @@ const Home = () => {
   const [showVideos, setShowVideos] = useState<boolean>(false)
   const [playerReady, setPlayerReady] = useState<boolean[]>([false, false, false])
   const [videoTitles, setVideoTitles] = useState<string[]>(['', '', ''])
+
+  const playerOptions: {
+    height: string;
+    width: string;
+  } = {
+    height: '390',
+    width: '640',
+  }
 
   const handleInputChange = (index: number, event: ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value
@@ -122,69 +134,107 @@ const Home = () => {
     }
   }, [currentTimer])
 
-  return (
-    <main className="flex flex-col h-screen px-24 py-12 bg-[#BA4949] items-center">
-
-      <div className="flex h-2/6 flex-col items-center justify-center">
-        <h1 className="text-white text-4xl font-bold">{stateName[state]}</h1>
-        <div className="bg-white text-black text-6xl font-bold rounded-full w-40 h-40 flex items-center justify-center mt-8">
-          {formatTime(currentTimer)}
+  return (<>
+    <div className="flex flex-col h-screen justify-between bg-[#BA4949]">
+      {/* Menú superior */}
+      <nav className="flex items-center justify-end p-6 w-3/6 mx-auto">
+        <div className="text-white">
+          <BsGearFill />
         </div>
-      </div>
+      </nav>
 
-      <div className="flex h-3/6 items-center justify-center">
-        
-        <div className='flex flex-col'>
-          {showInputs && (<>
-          <YoutubeInput
-            placeholder="Pommodoro YouTube URL"
-            onChange={(e) => handleInputChange(0, e)}
-            isReady={playerReady[0]}
-          />
-          <p>{videoTitles[0]}</p>
+      {/* Elemento central */}
+      <main className="flex-grow">
+        <div className="flex flex-col items-center h-full">
+          <h1 className="text-white text-4xl font-bold">{stateName[state]}</h1>
 
-          <YoutubeInput
-            placeholder="Short Break YouTube URL"
-            onChange={(e) => handleInputChange(1, e)}
-            isReady={playerReady[1]}
-          />
-          <p>{videoTitles[1]}</p>
-
-          <YoutubeInput
-            placeholder="Long Break YouTube URL"
-            onChange={(e) => handleInputChange(2, e)}
-            isReady={playerReady[2]}
-          />
-          <p>{videoTitles[2]}</p>
-          </>)}
-        </div>
-
-        <div className={`flex space-x-2 ${!showVideos ? 'hidden' : ''}`}>
-          {videoIds.map((videoId, index) => (<>
-            <div className={`${state !== index ? 'hidden' : ''} p-3 bg-neutral-200 rounded border-b-4 border-l-2 shadow-lg border-neutral-500`}>
-              <YouTube
-                key={index}
-                videoId={videoId}
-                opts={playerOptions}
-                // @ts-ignore
-                containerClassName={`w-64 h-36 ${activePlayer === index ? 'border-2 border-blue-500' : ''}`}
-                onReady={(e) => onPlayerReady(index, e)}
-              />
+          <div className="grid grid-flow-col gap-5 text-center auto-cols-max mt-10">
+            <div className="flex flex-col p-2 bg-slate-200 rounded-box text-neutral-content">
+              <span className="countdown font-mono text-8xl text-black">
+                <span style={{ "--value": getTimeValue(currentTimer, 'minutes') } as React.CSSProperties}></span>
+              </span>
+              min
+            </div> 
+            <div className="flex flex-col p-2 bg-slate-200 rounded-box text-neutral-content">
+              <span className="countdown font-mono text-8xl text-black">
+                <span style={{ "--value": getTimeValue(currentTimer, 'seconds') } as React.CSSProperties}></span>
+              </span>
+              sec
             </div>
-          </>))}
+          </div>
+
+          {showInputs && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-10">
+              <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm mx-auto">
+                <div className="mb-4">
+                  <h2 className="text-2xl text-gray-700 font-semibold">Enter YouTube URLs</h2>
+                </div>
+
+                <div className="space-y-4">
+                  <YoutubeInput
+                    placeholder="Pommodoro YouTube URL"
+                    onChange={(e) => handleInputChange(0, e)}
+                    isReady={playerReady[0]}
+                  />
+
+                  <YoutubeInput
+                    placeholder="Short Break YouTube URL"
+                    onChange={(e) => handleInputChange(1, e)}
+                    isReady={playerReady[1]}
+                  />
+
+                  <YoutubeInput
+                    placeholder="Long Break YouTube URL"
+                    onChange={(e) => handleInputChange(2, e)}
+                    isReady={playerReady[2]}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className={`hidden`}>
+            {videoIds.map((videoId, index) => (
+              <div key={index} className={`${state !== index ? 'hidden' : ''} p-2 bg-neutral-200 rounded border-b-4 border-l-2 shadow-lg border-neutral-500 youtube-player-wrapper`}>
+                <YouTube
+                  videoId={videoId}
+                  opts={{
+                    height: '100%',
+                    width: '100%',
+                    playerVars: {
+                      autoplay: 0,
+                      controls: 0,
+                      loop: 1,
+                      modestbranding: 1,
+                      rel: 0,
+                      showinfo: 0,
+                    },
+                  }}
+                  onReady={(e) => onPlayerReady(index, e)}
+                />
+              </div>
+            ))}
+          </div>
+
         </div>
-
-      </div>
-
+      </main>
 
 
-      <div className='flex flex-grow flex-col justify-end'>
+      {/* Caja de botones en la parte inferior */}
+      <footer className="flex flex-col justify-center mb-10">
+        <div className='flex justify-center mb-2'>
+          {timers[state]-currentTimer !== 0 && <progress className="progress w-3/6 mx-auto" value={timers[state]-currentTimer} max={timers[state]}></progress>}
+        </div>
         <div className='flex gap-2 justify-center items-center'>
-          <Button type={2} label={showInputs ? "Hide Music" : "Add Music"} onClick={() => setShowInputs(!showInputs)} />
-          { playerReady.some((ready) => ready) && <Button type={2} label={showVideos ? "Hide Video" : "Show Video"} onClick={() => setShowVideos(!showVideos)}/> }
+          
+          <span className={showInputs ? "z-10" : ""}><Button type={2} label={showInputs ? "Hide Music" : "Add Music"} onClick={() => setShowInputs(!showInputs)} /></span>
+          { /* playerReady.some((ready) => ready) && <Button type={2} label={showVideos ? "Hide Video" : "Show Video"} onClick={() => setShowVideos(!showVideos)}/> */}
+          <Button type={3} icon={IoThunderstormSharp} onClick={() => {}} />
+          <Button type={3} icon={IoCloudyNight} onClick={() => {}} />
+          <Button type={3} icon={MdForest} onClick={() => {}} />
+          <Button type={3} icon={GiBigWave} onClick={() => {}} />
         </div>
         
-
         <div className="flex mt-3 justify-center items-center">
           {!timerActive ? (
             <Button type={1} icon={FaPlay} onClick={handleStart} />
@@ -194,13 +244,14 @@ const Home = () => {
           <Button type={1} icon={FaUndo} onClick={handleReset} />
           <Button type={1} icon={FaForward} onClick={changeState} />
         </div>
-      </div>
-
-
-
-    </main>
-  )
+      </footer>
+    </div>
+  </>)
 }
+export default Test
 
-export default Home
+
+
+
+
 

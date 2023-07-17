@@ -10,14 +10,6 @@ export const timers: Record<number, number> = {
   2: 15 * 60
 }
 
-export const playerOptions: {
-  height: string;
-  width: string;
-} = {
-  height: '390',
-  width: '640',
-}
-
 export const buttonSources: Record<number, string> = {
   1: '/sounds/buttonSound1.mp3',
   2: '/sounds/buttonSound2.mp3',

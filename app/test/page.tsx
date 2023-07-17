@@ -161,32 +161,25 @@ const Test = () => {
           </div>
 
           {showInputs && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
-              <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm mx-auto">
-                <div className="mb-4">
-                  <h2 className="text-2xl text-gray-700 font-semibold">Ingresar URL de YouTube</h2>
-                  <p className="text-gray-600">Por favor, ingresa los enlaces a los videos que quieras usar para cada estado.</p>
-                </div>
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75 z-10">
+              <div className="bg-white p-8 rounded-md">
+                <YoutubeInput
+                  placeholder="Pommodoro YouTube URL"
+                  onChange={(e) => handleInputChange(0, e)}
+                  isReady={playerReady[0]}
+                />
 
-                <div className="space-y-4">
-                  <YoutubeInput
-                    placeholder="Pommodoro YouTube URL"
-                    onChange={(e) => handleInputChange(0, e)}
-                    isReady={playerReady[0]}
-                  />
+                <YoutubeInput
+                  placeholder="Short Break YouTube URL"
+                  onChange={(e) => handleInputChange(1, e)}
+                  isReady={playerReady[1]}
+                />
 
-                  <YoutubeInput
-                    placeholder="Short Break YouTube URL"
-                    onChange={(e) => handleInputChange(1, e)}
-                    isReady={playerReady[1]}
-                  />
-
-                  <YoutubeInput
-                    placeholder="Long Break YouTube URL"
-                    onChange={(e) => handleInputChange(2, e)}
-                    isReady={playerReady[2]}
-                  />
-                </div>
+                <YoutubeInput
+                  placeholder="Long Break YouTube URL"
+                  onChange={(e) => handleInputChange(2, e)}
+                  isReady={playerReady[2]}
+                />
               </div>
             </div>
           )}
