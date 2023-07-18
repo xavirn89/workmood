@@ -9,7 +9,7 @@ type ButtonProps = {
   label?: string
   onClick: () => void
   players?: string[]
-  playerName: string
+  playerName?: string
 }
 
 const stylesFromType = {
@@ -41,7 +41,7 @@ const Button: FC<ButtonProps> = ({ type, icon: Icon, label, onClick, players, pl
   const [pushed, setPushed] = useState<boolean>(false)
 
   useEffect(() => {
-    if (type === 3 && players) {
+    if (type === 3 && players && playerName) {
       setPushed(players.includes(playerName))
     }
   }, [players])
