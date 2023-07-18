@@ -12,7 +12,15 @@ type ButtonProps = {
   playerName?: string
 }
 
-const stylesFromType = {
+type Styles = {
+  color: string,
+  background: string,
+  border: string,
+  paddingX: string,
+  paddingY: string
+}
+
+const stylesFromType: { [key: number]: Styles } = {
   1: {
     color: 'text-black',
     background: 'bg-slate-200',
