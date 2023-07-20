@@ -5,12 +5,12 @@ import { FaPlay, FaPause, FaUndo, FaForward, FaCheck } from 'react-icons/fa'
 import { IoThunderstormSharp, IoCloudyNight } from 'react-icons/io5'
 import { GiBigWave } from 'react-icons/gi'
 import { MdForest } from 'react-icons/md'
+import { BsFillGearFill } from 'react-icons/bs'
 
 import { getTimeValue, extractYouTubeVideoId } from '@/utils/functions'
 
 import YoutubeInput from '@/components/YoutubeInput'
 import Button from '@/components/Button'
-
 
 const timers: Record<string, number> = {
   "Work": 25 * 60,
@@ -18,10 +18,10 @@ const timers: Record<string, number> = {
   "Long Break": 15 * 60
 }
 
-const stateName = {
-  WORK: "Work",
-  SHORT_BREAK: "Short Break",
-  LONG_BREAK: "Long Break"
+enum StateName {
+  WORK = "Work",
+  SHORT_BREAK = "Short Break",
+  LONG_BREAK = "Long Break"
 }
 
 const ambiencesURLs: Record<string, string> = {
@@ -48,8 +48,7 @@ interface StateObject {
 
 
 const Test = () => {
-  const [prevState, setPrevState] = useState<string>('')
-  const [state, setState] = useState<string>(stateName.WORK)
+  const [state, setState] = useState<StateName>(StateName.WORK);
   const [timer, setTimer] = useState<number>(timers[state])
 
   const [players, setPlayers] = useState<PlayerObject[]>([])
@@ -61,16 +60,16 @@ const Test = () => {
   
 
   const [stateData, setStateData] = useState<Record<string, StateObject>>({
-    [stateName.WORK]: {
-      state: stateName.WORK,
+    [StateName.WORK]: {
+      state: StateName.WORK,
       players: []
     },
-    [stateName.SHORT_BREAK]: {
-      state: stateName.SHORT_BREAK,
+    [StateName.SHORT_BREAK]: {
+      state: StateName.SHORT_BREAK,
       players: []
     },
-    [stateName.LONG_BREAK]: {
-      state: stateName.LONG_BREAK,
+    [StateName.LONG_BREAK]: {
+      state: StateName.LONG_BREAK,
       players: []
     }
   })
@@ -115,15 +114,6 @@ const Test = () => {
   useEffect(() => {
     console.log(stateData)
   }, [stateData])
-  
-  const handlePlayerReady = (playerID: string, event: { target: any }): void => {
-    const newPlayers = [...players]
-    const index = newPlayers.findIndex(player => player.id === playerID)
-    newPlayers[index].player = event.target
-    newPlayers[index].ready = true
-    newPlayers[index].title = event.target.getVideoData().title
-    setPlayers(newPlayers)
-  }
     
   const handleStart = (): void => {
     setTimerActive(true)
@@ -138,37 +128,48 @@ const Test = () => {
   }
 
   const changeState = (): void => {
-    if (state === stateName.WORK) {
-      setState(stateName.SHORT_BREAK)
-      setTimer(timers[stateName.SHORT_BREAK])
-      setPrevState(stateName.WORK)
-    } else if (state === stateName.SHORT_BREAK) {
-      setState(stateName.LONG_BREAK)
-      setTimer(timers[stateName.LONG_BREAK])
-      setPrevState(stateName.SHORT_BREAK)
-    } else if (state === stateName.LONG_BREAK) {
-      setState(stateName.WORK)
-      setTimer(timers[stateName.WORK])
-      setPrevState(stateName.LONG_BREAK)
+    if (state === StateName.WORK) {
+      setState(StateName.SHORT_BREAK)
+      setTimer(timers[StateName.SHORT_BREAK])
+    } else if (state === StateName.SHORT_BREAK) {
+      setState(StateName.LONG_BREAK)
+      setTimer(timers[StateName.LONG_BREAK])
+    } else if (state === StateName.LONG_BREAK) {
+      setState(StateName.WORK)
+      setTimer(timers[StateName.WORK])
     }
   }
 
   const playVideos = (playerIDs: string[]) => {
-    const playersToPlay = players.filter(player => playerIDs.includes(player.id))
-    playersToPlay.forEach(player => {
-      if (player.ready) {
-        (player.player as any)?.playVideo()
-      }
+    if (!timerActive) return
+    let newPlayers = [...players]
+    newPlayers = newPlayers.map(player => {
+        if (!playerIDs.includes(player.id)) {
+            return player
+        }
+        if (player.ready) {
+            (player.player as any)?.playVideo()
+            return {...player, isPlaying: true}
+        }
+        return player
     })
+    setPlayers(newPlayers)
   }
+
   
   const pauseVideos = (playerIDs: string[]) => {
-    const playersToPause = players.filter(player => playerIDs.includes(player.id))
-    playersToPause.forEach(player => {
-      if (player.ready) {
-        (player.player as any)?.pauseVideo()
-      }
+    let newPlayers = [...players]
+    newPlayers = newPlayers.map(player => {
+        if (!playerIDs.includes(player.id)) {
+            return player
+        }
+        if (player.ready) {
+            (player.player as any)?.pauseVideo()
+            return {...player, isPlaying: false}
+        }
+        return player
     })
+    setPlayers(newPlayers)
   }
 
   useEffect(() => {
@@ -184,26 +185,8 @@ const Test = () => {
       changeState()
     }
 
-    if (timerActive && !musicMuted) {
-      playVideos(stateData[state].players)
-    } else if (!timerActive && !musicMuted) {
-      pauseVideos(stateData[state].players)
-    }
-
     return () => clearInterval(interval!)
   }, [timerActive])
-  
-  useEffect(() => {
-    const playersToPause = stateData[prevState]?.players.filter(playerID => !stateData[state]?.players.includes(playerID))
-    const playersToPlay = stateData[state]?.players.filter(playerID => !stateData[prevState]?.players.includes(playerID))
-    if (!playersToPause || !playersToPlay) return
-    if (timerActive) {
-      pauseVideos(playersToPause)
-      playVideos(playersToPlay)
-    } else {
-      pauseVideos(playersToPause)
-    }
-  }, [state])
 
   const handleClickAmbience = (type: string) => {
     const typeURL = ambiencesURLs[type]
@@ -226,7 +209,7 @@ const Test = () => {
       setPlayers(newPlayers)
     }
 
-    /* mirar si el player ya existe en el stateData del state actual, y si no, añadir el player al stateData  */
+    /* mirar si el player ya existe en el stateData del state actual, y si no, añadir el player al stateData, pausarlo y poner el isPlaying a false  */
     if (!stateData[state].players.includes(type)) {
       setStateData(prevStateData => ({
         ...prevStateData,
@@ -245,14 +228,61 @@ const Test = () => {
         }
       }))
     }
+  }
 
-    
+  const checkPlayersForCurrentState = () => {
+
+    const playersIDsToPlay: string[] = stateData[state].players
+    const playersToPlay = players.filter(player => playersIDsToPlay.includes(player.id))
+    const playersToPause = players.filter(player => !playersIDsToPlay.includes(player.id))
+    const playersIDsToPause: string[] = playersToPause.map(player => player.id)
+    const allPaused = players.every(player => !player.isPlaying)
+    const allPlayersPlaying = playersToPlay.every(player => player.isPlaying)
+    const allPausersPaused = playersToPause.every(player => !player.isPlaying)
+
+    if (!timerActive && !allPaused) {
+      const allPlayersIDs = players.map(player => player.id)
+      pauseVideos(allPlayersIDs)
+      return
+    }
+
+    if (timerActive && !allPlayersPlaying) {
+      playVideos(playersIDsToPlay)
+      return
+    }
+
+    if (allPlayersPlaying && allPausersPaused) return
+
+    if (!allPlayersPlaying) {
+      playVideos(playersIDsToPlay)
+    }
+    if (!allPausersPaused) {
+      pauseVideos(playersIDsToPause)
+    }
+
   }
 
 
+  const handlePlayerReady = (playerID: string, event: { target: any }): void => {
+    const newPlayers = [...players]
+    const index = newPlayers.findIndex(player => player.id === playerID)
+    newPlayers[index].player = event.target
+    newPlayers[index].ready = true
+    newPlayers[index].title = event.target.getVideoData().title
+    setPlayers(newPlayers)
+    checkPlayersForCurrentState()
+  }
+
+  useEffect(() => {
+    checkPlayersForCurrentState()
+  }, [stateData[state].players, timerActive, state])
 
   return (
-    <main className='felx flex-col h-screen bg-red-800 bg-opacity-70'>
+    <main className='flex flex-col h-screen justify-between py-8 bg-neutral-800 bg-opacity-70'>
+      
+      <div className='flex flex-col items-end px-32'>
+        <BsFillGearFill className='text-white' />
+      </div>
 
       <div className='flex flex-col items-center'>
         <h1 className="text-white text-4xl font-bold">{state}</h1>
@@ -282,11 +312,27 @@ const Test = () => {
             isReady={players.find(player => player.id === "Work")?.ready || false}
           />
         </div>
+        <div className='flex items-center'>
+          <YoutubeInput
+            placeholder="Work YouTube URL"
+            playerID="ShortBreak"
+            functionOnClick={handleInputClick}
+            isReady={players.find(player => player.id === "ShortBreak")?.ready || false}
+          />
+        </div>
+        <div className='flex items-center'>
+          <YoutubeInput
+            placeholder="Work YouTube URL"
+            playerID="LongBreak"
+            functionOnClick={handleInputClick}
+            isReady={players.find(player => player.id === "LongBreak")?.ready || false}
+          />
+        </div>
       </div>
 
       <div className="hidden">
         {players.map((playerObject) => (
-          <span key={playerObject.id}>
+          <div key={playerObject.id}>
             <YouTube
               videoId={playerObject.videoId}
               opts={{
@@ -303,46 +349,52 @@ const Test = () => {
               }}
               onReady={(e) => handlePlayerReady(playerObject.id, e)}
             />
-          </span>
+          </div>
         ))}
       </div>
 
       <div className="flex mt-3 justify-center items-center">
-        {!timerActive ? (
-          <Button type={1} icon={FaPlay} onClick={handleStart} />
-        ) : (
-          <Button type={1} icon={FaPause} onClick={handlePause} />
-        )}
-        <Button type={1} icon={FaUndo} onClick={handleReset} />
-        <Button type={1} icon={FaForward} onClick={changeState} />
-        <Button 
-          type={3} 
-          icon={IoThunderstormSharp} 
-          onClick={() => handleClickAmbience("Thunderstorm")} 
-          players={stateData[state]?.players}
-          playerName="Thunderstorm"
-        />
-        <Button 
-          type={3} 
-          icon={GiBigWave} 
-          onClick={() => handleClickAmbience("Waves")} 
-          players={stateData[state]?.players}
-          playerName="Waves"
-        />
-        <Button 
-          type={3} 
-          icon={MdForest} 
-          onClick={() => handleClickAmbience("Forest")} 
-          players={stateData[state]?.players}
-          playerName="Forest"
-        />
-        <Button 
-          type={3} 
-          icon={IoCloudyNight} 
-          onClick={() => handleClickAmbience("Night")} 
-          players={stateData[state]?.players}
-          playerName="Night"
-        />
+
+        <div className='flex w-1/3'></div>
+        <div className='flex justify-center'>
+          {!timerActive ? (
+            <Button type={1} icon={FaPlay} onClick={handleStart} />
+          ) : (
+            <Button type={1} icon={FaPause} onClick={handlePause} />
+          )}
+          <Button type={1} icon={FaUndo} onClick={handleReset} />
+          <Button type={1} icon={FaForward} onClick={changeState} />
+        </div>
+        <div className='flex w-1/3 justify-start'>
+          <Button 
+            type={3} 
+            icon={IoThunderstormSharp} 
+            onClick={() => handleClickAmbience("Thunderstorm")} 
+            players={stateData[state]?.players}
+            playerName="Thunderstorm"
+          />
+          <Button 
+            type={3} 
+            icon={GiBigWave} 
+            onClick={() => handleClickAmbience("Waves")} 
+            players={stateData[state]?.players}
+            playerName="Waves"
+          />
+          <Button 
+            type={3} 
+            icon={MdForest} 
+            onClick={() => handleClickAmbience("Forest")} 
+            players={stateData[state]?.players}
+            playerName="Forest"
+          />
+          <Button 
+            type={3} 
+            icon={IoCloudyNight} 
+            onClick={() => handleClickAmbience("Night")} 
+            players={stateData[state]?.players}
+            playerName="Night"
+          />
+        </div>
         
       </div>
     </main>
