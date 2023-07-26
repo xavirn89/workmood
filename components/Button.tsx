@@ -10,13 +10,15 @@ type ButtonProps = {
   onClick: () => void
   players?: string[]
   playerName?: string
+  isReady?: boolean
+  pushedIcon?: IconType
 }
 
 type Styles = {
-  color: string,
-  background: string,
-  border: string,
-  paddingX: string,
+  color: string
+  background: string
+  border: string
+  paddingX: string
   paddingY: string
 }
 
@@ -42,15 +44,25 @@ const stylesFromType: { [key: number]: Styles } = {
     paddingX: 'px-4',
     paddingY: 'py-2',
   },
+  4: {
+    color: 'text-white',
+    background: 'bg-green-500',
+    border: 'border-green-700',
+    paddingX: 'px-4',
+    paddingY: 'py-2',
+  },
 }
 
-const Button: FC<ButtonProps> = ({ type, icon: Icon, label, onClick, players, playerName }) => {
+const Button: FC<ButtonProps> = ({ type, icon: Icon, label, onClick, players, playerName, isReady = false, pushedIcon }) => {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [pushed, setPushed] = useState<boolean>(false)
 
   useEffect(() => {
     if (type === 3 && players && playerName) {
       setPushed(players.includes(playerName))
+    }
+    if (type === 4) {
+      setPushed(isReady)
     }
   }, [players])
 
@@ -61,15 +73,19 @@ const Button: FC<ButtonProps> = ({ type, icon: Icon, label, onClick, players, pl
     if (type === 3) {
       setPushed(!pushed)
     }
+    if (type === 4) {
+      setPushed(isReady)
+    }
     onClick()
   }
 
   const styles = stylesFromType[type] || stylesFromType[1]
+  Icon = pushed && pushedIcon ? pushedIcon : Icon
   
   let buttonStyles = ''
   if (type === 1 || type === 2) {
     buttonStyles = `rounded ${styles.paddingX} ${styles.paddingY} m-1 border-b-4 border-l-2 shadow-lg ${styles.background} ${styles.border} transform transition-all duration-200 ease-in-out active:scale-95 active:border-b-2`
-  } else if (type === 3) {
+  } else if (type === 3 || type === 4) {
     const scale = pushed ? 'scale-95' : 'scale-100'
     const borderB = pushed ? 'border-b-2' : 'border-b-4'
     buttonStyles = `rounded ${styles.paddingX} ${styles.paddingY} m-1 ${borderB} border-l-2 shadow-lg ${styles.background} ${styles.border} transform transition-all duration-200 ease-in-out active:${scale}`

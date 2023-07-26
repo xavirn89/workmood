@@ -5,7 +5,8 @@ import { FaPlay, FaPause, FaUndo, FaForward, FaCheck } from 'react-icons/fa'
 import { IoThunderstormSharp, IoCloudyNight } from 'react-icons/io5'
 import { GiBigWave } from 'react-icons/gi'
 import { MdForest } from 'react-icons/md'
-import { BsFillGearFill } from 'react-icons/bs'
+import { BsFillGearFill, BsCheck } from 'react-icons/bs'
+import { AiFillYoutube, AiOutlineYoutube } from 'react-icons/ai'
 
 import { getTimeValue, extractYouTubeVideoId } from '@/utils/functions'
 
@@ -104,15 +105,15 @@ const Test = () => {
   }
 
   useEffect(() => {
-    console.log(state)
+    console.log('State: ', state)
   }, [state])
 
   useEffect(() => {
-    console.log(players)
+    console.log('Players: ', players)
   }, [players])
 
   useEffect(() => {
-    console.log(stateData)
+    console.log('StateData: ', stateData)
   }, [stateData])
     
   const handleStart = (): void => {
@@ -303,32 +304,39 @@ const Test = () => {
         </div>
       </div>
 
-      <div className='flex flex-col items-center'>
-        <div className='flex items-center'>
-          <YoutubeInput
-            placeholder="Work YouTube URL"
-            playerID="Work"
-            functionOnClick={handleInputClick}
-            isReady={players.find(player => player.id === "Work")?.ready || false}
-          />
-        </div>
-        <div className='flex items-center'>
-          <YoutubeInput
-            placeholder="Work YouTube URL"
-            playerID="ShortBreak"
-            functionOnClick={handleInputClick}
-            isReady={players.find(player => player.id === "ShortBreak")?.ready || false}
-          />
-        </div>
-        <div className='flex items-center'>
-          <YoutubeInput
-            placeholder="Work YouTube URL"
-            playerID="LongBreak"
-            functionOnClick={handleInputClick}
-            isReady={players.find(player => player.id === "LongBreak")?.ready || false}
-          />
-        </div>
-      </div>
+      <dialog id="modalYTInputs" className="modal">
+        <form method="dialog" className="modal-box flex flex-col items-center">
+          <h3 className="font-bold text-lg">Hello!</h3>
+          <p className="py-4">Press ESC key or click outside to close</p>
+          <div className='flex items-center'>
+            <YoutubeInput
+              placeholder="Work YouTube URL"
+              playerID="Work"
+              functionOnClick={handleInputClick}
+              isReady={players.find(player => player.id === "Work")?.ready || false}
+            />
+          </div>
+          <div className='flex items-center'>
+            <YoutubeInput
+              placeholder="Short Break YouTube URL"
+              playerID="ShortBreak"
+              functionOnClick={handleInputClick}
+              isReady={players.find(player => player.id === "ShortBreak")?.ready || false}
+            />
+          </div>
+          <div className='flex items-center'>
+            <YoutubeInput
+              placeholder="Long Break YouTube URL"
+              playerID="LongBreak"
+              functionOnClick={handleInputClick}
+              isReady={players.find(player => player.id === "LongBreak")?.ready || false}
+            />
+          </div>
+        </form>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
 
       <div className="hidden">
         {players.map((playerObject) => (
@@ -355,7 +363,13 @@ const Test = () => {
 
       <div className="flex mt-3 justify-center items-center">
 
-        <div className='flex w-1/3'></div>
+        <div className='flex w-1/3 justify-end'>
+          <Button 
+            type={3} 
+            icon={AiFillYoutube} 
+            onClick={() => window.modalYTInputs.showModal()} 
+          />
+        </div>
         <div className='flex justify-center'>
           {!timerActive ? (
             <Button type={1} icon={FaPlay} onClick={handleStart} />

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { ChangeEvent, FC } from 'react'
 import { FaCheck, FaYoutube } from 'react-icons/fa'
 import { extractYouTubeVideoId } from '@/utils/functions'
-import Button from '@/components/Button'
+import { BsCheck, BsUpload } from 'react-icons/bs'
+import YoutubeInputButton from '@/components/buttons/YoutubeInputButton'
 
 type YoutubeInputProps = {
   placeholder: string
@@ -11,7 +12,7 @@ type YoutubeInputProps = {
   isReady: boolean
 }
 
-const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOnClick, isReady }) => {
+const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOnClick, isReady = false }) => {
   const [text, setText] = useState<string>('')
   const [videoId, setVideoId] = useState<string>('')
 
@@ -25,23 +26,23 @@ const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOn
     <div className="flex items-center">
       <input
         type="text"
-        className="border p-3 mb-2 shadow-sm rounded-lg"
+        className="border-2 border-gray-600 p-2 rounded-lg bg-white shadow-sm text-black"
         placeholder={placeholder}
         value={text}
         onChange={(event) => {
           setText(event.target.value)
         }}
       />
-      <Button
-        type={3}
-        icon={FaYoutube}
+      <YoutubeInputButton
+        icon={BsUpload}
+        pushedIcon={BsCheck}
         onClick={() => {
           if (videoId !== '') {
             functionOnClick(playerID, text)
           }
         }}
+        readyFlag={isReady}
       />
-      {isReady && <FaCheck className="text-green-500 ml-2" />}
     </div>
   )
 }
