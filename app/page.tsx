@@ -50,15 +50,22 @@ interface StateObject {
 
 
 const Test = () => {
+
+  const [timeWork, setTimeWork] = useState<number>(timers[StateName.WORK])
+  const [timeShortBreak, setTimeShortBreak] = useState<number>(timers[StateName.SHORT_BREAK])
+  const [timeLongBreak, setTimeLongBreak] = useState<number>(timers[StateName.LONG_BREAK])
+  const [longBreakInterval, setLongBreakInterval] = useState<number>(3)
+
   const [state, setState] = useState<StateName>(StateName.WORK);
   const [timer, setTimer] = useState<number>(timers[state])
-
   const [players, setPlayers] = useState<PlayerObject[]>([])
+
+
 
   //flags
   const [timerActive, setTimerActive] = useState<boolean>(false)
-  const [musicMuted, setMusicMuted] = useState<boolean>(false)
-  const [ambienceMuted, setAmbienceMuted] = useState<boolean>(false)
+  const [musicVolume, setMusicVolume] = useState<number>(50)
+  const [ambienceVolume, setAmbienceVolume] = useState<number>(25)
 
   const [showYoutubeModal, setShowYoutubeModal] = useState<boolean>(false)
   
@@ -270,6 +277,8 @@ const Test = () => {
   const handlePlayerReady = (playerID: string, event: { target: any }): void => {
     const newPlayers = [...players]
     const index = newPlayers.findIndex(player => player.id === playerID)
+    const newVolume = newPlayers[index].type === 'input' ? musicVolume : ambienceVolume
+    event.target.setVolume(newVolume)
     newPlayers[index].player = event.target
     newPlayers[index].ready = true
     newPlayers[index].title = event.target.getVideoData().title
@@ -288,11 +297,35 @@ const Test = () => {
     }
   }, [showYoutubeModal])
 
+  const handleMusicVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    /* Para cada player que el type sea 'input', cambiar el volumen */
+    const newPlayers = [...players]
+    newPlayers.forEach(player => {
+      if (player.type === 'input') {
+        player.player?.setVolume(Number(event.target.value))
+      }
+    })
+    setPlayers(newPlayers)
+    setMusicVolume(Number(event.target.value))
+  }
+
+  const handleAmbienceVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    /* Para cada player que el type sea 'ambience', cambiar el volumen */
+    const newPlayers = [...players]
+    newPlayers.forEach(player => {
+      if (player.type === 'ambience') {
+        player.player?.setVolume(Number(event.target.value))
+      }
+    })
+    setPlayers(newPlayers)
+    setAmbienceVolume(Number(event.target.value))
+  }
+
   return (
-    <main className='flex flex-col h-screen justify-between py-8 bg-neutral-800 bg-opacity-70'>
+    <main className='flex flex-col h-screen justify-between py-8 bg-opacity-70'>
       
       <div className='flex flex-col items-end px-32'>
-        <BsFillGearFill className='text-white' />
+        <BsFillGearFill className='text-gray' onClick={()=>window.modalConfig.showModal()}/>
       </div>
 
       <div className='flex flex-col items-center'>
@@ -313,6 +346,135 @@ const Test = () => {
           </div>
         </div>
       </div>
+
+      <div className="hidden">
+        {players.map((playerObject) => (
+          <div key={playerObject.id}>
+            <YouTube
+              videoId={playerObject.videoId}
+              opts={{
+                height: '100%',
+                width: '100%',
+                playerVars: {
+                  autoplay: 0,
+                  controls: 0,
+                  loop: 1,
+                  modestbranding: 1,
+                  rel: 0,
+                  showinfo: 0,
+                },
+              }}
+              onReady={(e) => handlePlayerReady(playerObject.id, e)}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="flex mt-3 justify-center items-center">
+
+        <div className='flex w-1/3 justify-end'>
+          <OnOffButton 
+            icon={AiFillYoutube} 
+            functionToggle={() => setShowYoutubeModal((prev) => !prev)}
+            isPushed={showYoutubeModal} 
+          />
+          <input type="range" min={0} max="100" value={musicVolume} className="range range-xs" onChange={handleMusicVolumeChange} />
+        </div>
+        <div className='flex justify-center'>
+          {!timerActive ? (
+            <Button type={1} icon={FaPlay} onClick={handleStart} />
+          ) : (
+            <Button type={1} icon={FaPause} onClick={handlePause} />
+          )}
+          <Button type={1} icon={FaUndo} onClick={handleReset} />
+          <Button type={1} icon={FaForward} onClick={changeState} />
+        </div>
+        <div className='flex w-1/3 justify-start'>
+          <Button 
+            type={3} 
+            icon={IoThunderstormSharp} 
+            onClick={() => handleClickAmbience("Thunderstorm")} 
+            players={stateData[state]?.players}
+            playerName="Thunderstorm"
+          />
+          <Button 
+            type={3} 
+            icon={GiBigWave} 
+            onClick={() => handleClickAmbience("Waves")} 
+            players={stateData[state]?.players}
+            playerName="Waves"
+          />
+          <Button 
+            type={3} 
+            icon={MdForest} 
+            onClick={() => handleClickAmbience("Forest")} 
+            players={stateData[state]?.players}
+            playerName="Forest"
+          />
+          <Button 
+            type={3} 
+            icon={IoCloudyNight} 
+            onClick={() => handleClickAmbience("Night")} 
+            players={stateData[state]?.players}
+            playerName="Night"
+          />
+          <input type="range" min={0} max="100" value={ambienceVolume} className="range range-xs" onChange={handleAmbienceVolumeChange} />
+        </div>
+        
+      </div>
+      
+      <dialog id="modalConfig" className="modal">
+        <form method="dialog" className="modal-box">
+          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+
+          <div className='flex flex-col'>
+            <h3 className="font-bold text-lg">Settings</h3>
+          </div>
+          <div className="divider"></div> 
+
+          <div className='flex justify-between'>
+            <div className='flex w-1/3 p-1'>
+              <label className="input-group input-group-vertical">
+                <span>Work</span>
+                <input type="text" value={timeWork} className="input input-bordered" />
+              </label>
+            </div>
+
+            <div className='flex w-1/3 p-1'>
+              <label className="input-group input-group-vertical">
+                <span>Short Break</span>
+                <input type="text" value={timeShortBreak} className="input input-bordered" />
+              </label>
+            </div>
+
+            <div className='flex w-1/3 p-1'>
+              <label className="input-group input-group-vertical">
+                <span>Long Break</span>
+                <input type="text" value={timeLongBreak} className="input input-bordered" />
+              </label>
+            </div>
+          </div>
+          
+          <div className='flex justify-end'>
+            <div className="flex p-1">
+              <label className="input-group">
+                <span>Long Break interval</span>
+                <input type="text" value={longBreakInterval} className="input input-sm input-bordered w-14" />
+              </label>
+            </div>
+          </div>
+          
+
+          <div className="divider"></div> 
+          <div className="flex justify-end">
+            <button className="btn btn-success">Save</button>
+          </div>
+          
+        </form>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
 
       <dialog id="modalYTInputs" className="modal" onClose={() => setShowYoutubeModal((prev) => !prev)}>
         <div className="modal-box flex flex-col items-center">
@@ -356,81 +518,9 @@ const Test = () => {
           <button>close</button>
         </form>
       </dialog>
-
-      <div className="hidden">
-        {players.map((playerObject) => (
-          <div key={playerObject.id}>
-            <YouTube
-              videoId={playerObject.videoId}
-              opts={{
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                  autoplay: 0,
-                  controls: 0,
-                  loop: 1,
-                  modestbranding: 1,
-                  rel: 0,
-                  showinfo: 0,
-                },
-              }}
-              onReady={(e) => handlePlayerReady(playerObject.id, e)}
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="flex mt-3 justify-center items-center">
-
-        <div className='flex w-1/3 justify-end'>
-          <OnOffButton 
-            icon={AiFillYoutube} 
-            functionToggle={() => setShowYoutubeModal((prev) => !prev)}
-            isPushed={showYoutubeModal} 
-          />
-        </div>
-        <div className='flex justify-center'>
-          {!timerActive ? (
-            <Button type={1} icon={FaPlay} onClick={handleStart} />
-          ) : (
-            <Button type={1} icon={FaPause} onClick={handlePause} />
-          )}
-          <Button type={1} icon={FaUndo} onClick={handleReset} />
-          <Button type={1} icon={FaForward} onClick={changeState} />
-        </div>
-        <div className='flex w-1/3 justify-start'>
-          <Button 
-            type={3} 
-            icon={IoThunderstormSharp} 
-            onClick={() => handleClickAmbience("Thunderstorm")} 
-            players={stateData[state]?.players}
-            playerName="Thunderstorm"
-          />
-          <Button 
-            type={3} 
-            icon={GiBigWave} 
-            onClick={() => handleClickAmbience("Waves")} 
-            players={stateData[state]?.players}
-            playerName="Waves"
-          />
-          <Button 
-            type={3} 
-            icon={MdForest} 
-            onClick={() => handleClickAmbience("Forest")} 
-            players={stateData[state]?.players}
-            playerName="Forest"
-          />
-          <Button 
-            type={3} 
-            icon={IoCloudyNight} 
-            onClick={() => handleClickAmbience("Night")} 
-            players={stateData[state]?.players}
-            playerName="Night"
-          />
-        </div>
-        
-      </div>
     </main>
+
+    
   )
 }
 
