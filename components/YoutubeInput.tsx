@@ -3,16 +3,18 @@ import { FC } from 'react'
 import { extractYouTubeVideoId } from '@/utils/functions'
 import { BsCheck, BsUpload } from 'react-icons/bs'
 import YoutubeInputButton from '@/components/buttons/YoutubeInputButton'
+import { StateName } from '@/utils/constants'
 
 type YoutubeInputProps = {
   placeholder: string
   playerID: string
-  functionOnClick: (playerID: string, inputURL: string) => void
+  functionOnClick: (playerID: string, inputURL: string, stateIndicator: StateName) => void
+  stateIndicator: StateName
   isReady: boolean
   playerTitle: string | null
 }
 
-const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOnClick, isReady = false, playerTitle }) => {
+const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOnClick, stateIndicator, isReady = false, playerTitle }) => {
   const [text, setText] = useState<string>('')
   const [videoId, setVideoId] = useState<string>('')
 
@@ -45,7 +47,7 @@ const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOn
             pushedIcon={BsCheck}
             onClick={() => {
               if (videoId !== '') {
-                functionOnClick(playerID, text)
+                functionOnClick(playerID, text, stateIndicator)
               }
             }}
             readyFlag={isReady}

@@ -1,118 +1,40 @@
 'use client'
 import { useState, useEffect, useRef, ChangeEvent, use } from 'react'
-import YouTube from 'react-youtube'
 import { FaPlay, FaPause, FaUndo, FaForward, FaCheck } from 'react-icons/fa'
 import { IoThunderstormSharp, IoCloudyNight } from 'react-icons/io5'
 import { GiBigWave } from 'react-icons/gi'
 import { MdForest } from 'react-icons/md'
-import { BsFillGearFill, BsCheck } from 'react-icons/bs'
-import { AiFillYoutube, AiOutlineYoutube } from 'react-icons/ai'
+
+import { PlayerObject, StateObject } from '@/types/mainTypes'
+import { timers, ambiencesURLs, StateName } from '@/utils/constants'
 
 import { getTimeValue, extractYouTubeVideoId } from '@/utils/functions'
 
-import YoutubeInput from '@/components/YoutubeInput'
-import OnOffButton from '@/components/buttons/OnOffButton'
 import Button from '@/components/Button'
+import TopNav from '@/components/ui/TopNav'
+import Timer from '@/components/ui/Timer'
+import YoutubeEmbeds from '@/components/ui/YoutubeEmbeds'
 
-const timers: Record<string, number> = {
-  "Work": 25 * 60,
-  "Short Break": 5 * 60,
-  "Long Break": 15 * 60
-}
-
-enum StateName {
-  WORK = "Work",
-  SHORT_BREAK = "Short Break",
-  LONG_BREAK = "Long Break"
-}
-
-const ambiencesURLs: Record<string, string> = {
-  "Thunderstorm": "https://www.youtube.com/watch?v=gVKEM4K8J8A",
-  "Waves": "https://www.youtube.com/watch?v=btmjDyff6E8",
-  "Forest": "https://www.youtube.com/watch?v=xNN7iTA57jM",
-  "Night": "https://www.youtube.com/watch?v=3TNK916Pjto"
-}
-
-interface PlayerObject {
-  player: YouTube | null
-  isPlaying: boolean
-  videoId: string
-  title: string
-  ready: boolean
-  id: string
-  type: string
-}
-
-interface StateObject {
-  state: string
-  players: string[]
-}
+import useAppState from '@/hooks/useAppState'
+import useTimer from '@/hooks/useTimer'
+import YoutubeLinksSection from '@/components/ui/YoutubeLinksSection'
 
 
 const Test = () => {
-
-  const [timeWork, setTimeWork] = useState<number>(timers[StateName.WORK])
-  const [timeShortBreak, setTimeShortBreak] = useState<number>(timers[StateName.SHORT_BREAK])
-  const [timeLongBreak, setTimeLongBreak] = useState<number>(timers[StateName.LONG_BREAK])
-  const [longBreakInterval, setLongBreakInterval] = useState<number>(3)
-
-  const [state, setState] = useState<StateName>(StateName.WORK);
-  const [timer, setTimer] = useState<number>(timers[state])
   const [players, setPlayers] = useState<PlayerObject[]>([])
 
+  const { 
+    state, stateData, longBreakInterval, addPlayerIDToStateData, removePlayerIDFromStateData, changeState, 
+  } = useAppState()
 
+  const { 
+    timer, timeWork, timeShortBreak, timeLongBreak, timerActive, resetTimer, toggleTimerActive 
+  } = useTimer({ state, changeState })
 
   //flags
-  const [timerActive, setTimerActive] = useState<boolean>(false)
+  
   const [musicVolume, setMusicVolume] = useState<number>(50)
-  const [ambienceVolume, setAmbienceVolume] = useState<number>(25)
-
-  const [showYoutubeModal, setShowYoutubeModal] = useState<boolean>(false)
-  
-
-  const [stateData, setStateData] = useState<Record<string, StateObject>>({
-    [StateName.WORK]: {
-      state: StateName.WORK,
-      players: []
-    },
-    [StateName.SHORT_BREAK]: {
-      state: StateName.SHORT_BREAK,
-      players: []
-    },
-    [StateName.LONG_BREAK]: {
-      state: StateName.LONG_BREAK,
-      players: []
-    }
-  })
-  
-
-  const handleInputClick = (playerID: string, inputURL: string): void => {
-    if (stateData[state].players.includes(playerID)) return
-    const value = inputURL
-    const videoId = extractYouTubeVideoId(value)
-    if (!videoId || videoId === '') return
-    const newPlayers = [...players]
-    newPlayers.push({
-      player: null,
-      isPlaying: false,
-      videoId: videoId,
-      title: '',
-      ready: false,
-      id: playerID,
-      type: 'input'
-    })
-    setPlayers(newPlayers)
-    /* mirar si el player ya existe en el stateData del state actual, y si no, añadir el player al stateData  */
-    if (!stateData[state].players.includes(playerID)) {
-      setStateData(prevStateData => ({
-        ...prevStateData,
-        [state]: {
-          ...prevStateData[state],
-          players: [...prevStateData[state].players, playerID]
-        }
-      }))
-    }
-  }
+  const [ambienceVolume, setAmbienceVolume] = useState<number>(25)  
 
   useEffect(() => {
     console.log('State: ', state)
@@ -125,31 +47,6 @@ const Test = () => {
   useEffect(() => {
     console.log('StateData: ', stateData)
   }, [stateData])
-    
-  const handleStart = (): void => {
-    setTimerActive(true)
-  }
-
-  const handlePause = (): void => {
-    setTimerActive(false)
-  }
-
-  const handleReset = (): void => {
-    setTimer(timers[state])
-  }
-
-  const changeState = (): void => {
-    if (state === StateName.WORK) {
-      setState(StateName.SHORT_BREAK)
-      setTimer(timers[StateName.SHORT_BREAK])
-    } else if (state === StateName.SHORT_BREAK) {
-      setState(StateName.LONG_BREAK)
-      setTimer(timers[StateName.LONG_BREAK])
-    } else if (state === StateName.LONG_BREAK) {
-      setState(StateName.WORK)
-      setTimer(timers[StateName.WORK])
-    }
-  }
 
   const playVideos = (playerIDs: string[]) => {
     if (!timerActive) return
@@ -183,61 +80,21 @@ const Test = () => {
     setPlayers(newPlayers)
   }
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
 
-    if (timerActive) {
-      interval = setInterval(() => {
-        setTimer(prevTimer => prevTimer - 1)
-      }, 1000)
-    } else if (!timerActive && timer !== 0) {
-      clearInterval(interval!)
-    } else if (!timerActive && timer === 0) {
-      changeState()
-    }
-
-    return () => clearInterval(interval!)
-  }, [timerActive])
-
-  const handleClickAmbience = (type: string) => {
-    const typeURL = ambiencesURLs[type]
+  const handleClickAmbience = (buttonPlayerId: string) => {
+    const typeURL = ambiencesURLs[buttonPlayerId]
     const videoId = extractYouTubeVideoId(typeURL)
     if (!videoId || videoId === '') return
 
-    /* mirar si existe algun player con este videoId */
     const player = players.find(player => player.videoId === videoId)
     if (!player) {
-      const newPlayers = [...players]
-      newPlayers.push({
-        player: null,
-        isPlaying: false,
-        videoId: videoId,
-        title: '',
-        ready: false,
-        id: type,
-        type: 'ambience'
-      })
-      setPlayers(newPlayers)
+      createNewAmbiencePlayer(buttonPlayerId, videoId)
     }
 
-    /* mirar si el player ya existe en el stateData del state actual, y si no, añadir el player al stateData, pausarlo y poner el isPlaying a false  */
-    if (!stateData[state].players.includes(type)) {
-      setStateData(prevStateData => ({
-        ...prevStateData,
-        [state]: {
-          ...prevStateData[state],
-          players: [...prevStateData[state].players, type]
-        }
-      }))
+    if (!stateData[state].players.includes(buttonPlayerId)) {
+      addPlayerIDToStateData(buttonPlayerId, state)
     } else {
-      /* sino, eliminarlo del stateData del state actual */
-      setStateData(prevStateData => ({
-        ...prevStateData,
-        [state]: {
-          ...prevStateData[state],
-          players: prevStateData[state].players.filter(player => player !== type)
-        }
-      }))
+      removePlayerIDFromStateData(buttonPlayerId, state)
     }
   }
 
@@ -290,19 +147,12 @@ const Test = () => {
     checkPlayersForCurrentState()
   }, [stateData[state].players, timerActive, state])
 
-  useEffect(() => {
-    if (showYoutubeModal){
-      // @ts-ignore
-      window.modalYTInputs.showModal()
-    }
-  }, [showYoutubeModal])
-
   const handleMusicVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     /* Para cada player que el type sea 'input', cambiar el volumen */
     const newPlayers = [...players]
     newPlayers.forEach(player => {
       if (player.type === 'input') {
-        player.player?.setVolume(Number(event.target.value))
+        (player.player as any)?.setVolume(Number(event.target.value))
       }
     })
     setPlayers(newPlayers)
@@ -314,79 +164,72 @@ const Test = () => {
     const newPlayers = [...players]
     newPlayers.forEach(player => {
       if (player.type === 'ambience') {
-        player.player?.setVolume(Number(event.target.value))
+        (player.player as any)?.setVolume(Number(event.target.value))
       }
     })
     setPlayers(newPlayers)
     setAmbienceVolume(Number(event.target.value))
   }
 
+  const createNewInputPlayer = (playerID: string, videoId: string): void => {
+    const newPlayers = [...players]
+    newPlayers.push({
+      player: null,
+      isPlaying: false,
+      videoId: videoId,
+      title: '',
+      ready: false,
+      id: playerID,
+      type: 'input'
+    })
+    setPlayers(newPlayers)
+  }
+
+  const createNewAmbiencePlayer = (buttonPlayerId: string, videoId: string): void => {
+    const newPlayers = [...players]
+    newPlayers.push({
+      player: null,
+      isPlaying: false,
+      videoId: videoId,
+      title: '',
+      ready: false,
+      id: buttonPlayerId,
+      type: 'ambience'
+    })
+    setPlayers(newPlayers)
+  }
+  
   return (
-    <main className='flex flex-col h-screen justify-between py-8 bg-opacity-70'>
-      
+    <main className='flex flex-col h-screen justify-between py-8'>
+
       <div className='flex flex-col items-end px-32'>
-        <BsFillGearFill className='text-gray' onClick={()=>window.modalConfig.showModal()}/>
+        {/* @ts-ignore */}
+        <TopNav openConfig={()=>window.modalConfig.showModal()} />
       </div>
 
       <div className='flex flex-col items-center'>
-        <h1 className="text-white text-4xl font-bold">{state}</h1>
-
-        <div className="grid grid-flow-col gap-5 text-center auto-cols-max mt-10">
-          <div className="flex flex-col p-2 bg-slate-200 rounded-box text-neutral-content">
-            <span className="countdown font-mono text-8xl text-black">
-              <span style={{ "--value": getTimeValue(timer, 'minutes') } as React.CSSProperties}></span>
-            </span>
-            min
-          </div> 
-          <div className="flex flex-col p-2 bg-slate-200 rounded-box text-neutral-content">
-            <span className="countdown font-mono text-8xl text-black">
-              <span style={{ "--value": getTimeValue(timer, 'seconds') } as React.CSSProperties}></span>
-            </span>
-            sec
-          </div>
-        </div>
-      </div>
-
-      <div className="hidden">
-        {players.map((playerObject) => (
-          <div key={playerObject.id}>
-            <YouTube
-              videoId={playerObject.videoId}
-              opts={{
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                  autoplay: 0,
-                  controls: 0,
-                  loop: 1,
-                  modestbranding: 1,
-                  rel: 0,
-                  showinfo: 0,
-                },
-              }}
-              onReady={(e) => handlePlayerReady(playerObject.id, e)}
-            />
-          </div>
-        ))}
+        <Timer state={state} timer={timer} />
       </div>
 
       <div className="flex mt-3 justify-center items-center">
 
         <div className='flex w-1/3 justify-end'>
-          <OnOffButton 
-            icon={AiFillYoutube} 
-            functionToggle={() => setShowYoutubeModal((prev) => !prev)}
-            isPushed={showYoutubeModal} 
+          <YoutubeLinksSection 
+            musicVolume={musicVolume}
+            onHandleMove={handleMusicVolumeChange}
+            players={players.filter(player => player.type === 'input')}
+            stateData={stateData}
+            addPlayerIDToStateData={addPlayerIDToStateData}
+            createNewInputPlayer={createNewInputPlayer}
           />
-          <input type="range" min={0} max="100" value={musicVolume} className="range range-xs" onChange={handleMusicVolumeChange} />
         </div>
         <div className='flex justify-center'>
           {!timerActive ? (
-            <Button type={1} icon={FaPlay} onClick={handleStart} />
+            <Button type={1} icon={FaPlay} onClick={toggleTimerActive} />
           ) : (
-            <Button type={1} icon={FaPause} onClick={handlePause} />
+            <Button type={1} icon={FaPause} onClick={toggleTimerActive} />
           )}
-          <Button type={1} icon={FaUndo} onClick={handleReset} />
+          <Button type={1} icon={FaUndo} onClick={resetTimer} />
           <Button type={1} icon={FaForward} onClick={changeState} />
         </div>
         <div className='flex w-1/3 justify-start'>
@@ -436,21 +279,21 @@ const Test = () => {
             <div className='flex w-1/3 p-1'>
               <label className="input-group input-group-vertical">
                 <span>Work</span>
-                <input type="text" value={timeWork} className="input input-bordered" />
+                <input type="text" value={timeWork} readOnly className="input input-bordered" />
               </label>
             </div>
 
             <div className='flex w-1/3 p-1'>
               <label className="input-group input-group-vertical">
                 <span>Short Break</span>
-                <input type="text" value={timeShortBreak} className="input input-bordered" />
+                <input type="text" value={timeShortBreak} readOnly className="input input-bordered" />
               </label>
             </div>
 
             <div className='flex w-1/3 p-1'>
               <label className="input-group input-group-vertical">
                 <span>Long Break</span>
-                <input type="text" value={timeLongBreak} className="input input-bordered" />
+                <input type="text" value={timeLongBreak} readOnly className="input input-bordered" />
               </label>
             </div>
           </div>
@@ -459,7 +302,7 @@ const Test = () => {
             <div className="flex p-1">
               <label className="input-group">
                 <span>Long Break interval</span>
-                <input type="text" value={longBreakInterval} className="input input-sm input-bordered w-14" />
+                <input type="text" value={longBreakInterval} readOnly className="input input-sm input-bordered w-14" />
               </label>
             </div>
           </div>
@@ -475,49 +318,7 @@ const Test = () => {
           <button>close</button>
         </form>
       </dialog>
-
-      <dialog id="modalYTInputs" className="modal" onClose={() => setShowYoutubeModal((prev) => !prev)}>
-        <div className="modal-box flex flex-col items-center">
-          <h3 className="font-bold text-lg">Youtube Links</h3>
-          <p className="py-4">Assign music videos to phases</p>
-
-          <div className="flex flex-col w-full px-4 mt-10">
-            <div className='flex items-center mb-2'>
-              <YoutubeInput
-                placeholder="Work YouTube URL"
-                playerID="Work"
-                functionOnClick={handleInputClick}
-                isReady={players.find(player => player.id === "Work")?.ready || false}
-                playerTitle={players.find(player => player.id === "Work")?.title || null}
-              />
-            </div>
-
-            <div className='flex items-center mb-2'>
-              <YoutubeInput
-                placeholder="Short Break YouTube URL"
-                playerID="ShortBreak"
-                functionOnClick={handleInputClick}
-                isReady={players.find(player => player.id === "ShortBreak")?.ready || false}
-                playerTitle={players.find(player => player.id === "ShortBreak")?.title || null}
-              />
-            </div>
-
-            <div className='flex items-center mb-2'>
-              <YoutubeInput
-                placeholder="Long Break YouTube URL"
-                playerID="LongBreak"
-                functionOnClick={handleInputClick}
-                isReady={players.find(player => player.id === "LongBreak")?.ready || false}
-                playerTitle={players.find(player => player.id === "LongBreak")?.title || null}
-              />
-            </div>
-          </div>
-
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
+      <YoutubeEmbeds players={players} onReady={handlePlayerReady} />
     </main>
 
     
