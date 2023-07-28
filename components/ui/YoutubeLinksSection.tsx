@@ -9,7 +9,7 @@ import { StateName } from '@/utils/constants'
 
 interface Props {
   musicVolume: number
-  onHandleMove: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onHandleMove: (event: React.ChangeEvent<HTMLInputElement>, playerType: 'input' | 'ambience') => void
   players: PlayerObject[]
   stateData: any
   addPlayerIDToStateData: (playerID: string, state: StateName) => void
@@ -45,7 +45,7 @@ const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, ad
       functionToggle={() => setShowYoutubeModal((prev) => !prev)}
       isPushed={showYoutubeModal} 
     />
-    <input type="range" min={0} max="100" value={musicVolume} className="range range-xs" onChange={onHandleMove} />
+    <input type="range" min={0} max="100" value={musicVolume} className="range range-xs" onChange={(event) => onHandleMove(event, 'input')} />
     <dialog id="modalYTInputs" className="modal" onClose={() => setShowYoutubeModal((prev) => !prev)}>
       <div className="modal-box flex flex-col items-center">
         <h3 className="font-bold text-lg">Youtube Links</h3>
