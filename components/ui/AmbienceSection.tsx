@@ -5,6 +5,7 @@ import { GiBigWave } from 'react-icons/gi'
 import { MdForest } from 'react-icons/md'
 
 import Button from '../Button'
+import { useStore } from '@/stores/globalStore'
 
 interface Props {
   handleClickAmbience: (buttonPlayerId: string) => void
@@ -14,6 +15,8 @@ interface Props {
 }
 
 const AmbienceSection = ({ handleClickAmbience, currentPlayers, ambienceVolume, handleVolumeChange }: Props): JSX.Element => {
+  const { mute } = useStore()
+
   return (<>
     <div className='flex flex-col'>
       <div className='flex'>
@@ -47,7 +50,7 @@ const AmbienceSection = ({ handleClickAmbience, currentPlayers, ambienceVolume, 
         />
       </div>
       
-      <input type="range" min={0} max="100" value={ambienceVolume} className="range range-xs scale-x-[-1] w-48" onChange={(event) => handleVolumeChange(event, 'ambience')} />
+      <input type="range" min={0} max="100" value={mute ? 0 : ambienceVolume} className="range range-xs scale-x-[-1] w-48" onChange={(event) => handleVolumeChange(event, 'ambience')} />
     </div>
   </>)
 }

@@ -9,6 +9,7 @@ import { StateName } from '@/utils/constants'
 import { TbSquareLetterW, TbSquareLetterS, TbSquareLetterL } from 'react-icons/tb'
 import { BiSolidVolumeMute } from 'react-icons/bi'
 import clsx from 'clsx'
+import { useStore } from '@/stores/globalStore'
 
 interface Props {
   musicVolume: number
@@ -20,7 +21,7 @@ interface Props {
 }
 
 const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, addPlayerIDToStateData, createNewInputPlayer }: Props): JSX.Element => {
-  const [showYoutubeModal, setShowYoutubeModal] = useState<boolean>(false)
+  const { mute, toggleMute } = useStore()
 
   const [inputState, setInputState] = useState<StateName | null>(null)
   const [textDivInput, setTextDivInput] = useState<string | null>('')
@@ -66,8 +67,8 @@ const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, ad
       <div className='flex justify-end'>
         <OnOffButton 
           icon={BiSolidVolumeMute} 
-          functionToggle={() => setShowYoutubeModal((prev) => !prev)}
-          isPushed={showYoutubeModal} 
+          functionToggle={toggleMute}
+          isPushed={mute} 
         />
         <OnOffButton 
           icon={TbSquareLetterL} 
@@ -86,7 +87,7 @@ const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, ad
         />
       </div>
       <div className='flex justify-end'>
-        <input type="range" min={0} max="100" value={musicVolume} className="range range-xs w-48" onChange={(event) => onHandleMove(event, 'input')} />
+        <input type="range" min={0} max="100" value={mute ? 0 : musicVolume} className="range range-xs w-48" onChange={(event) => onHandleMove(event, 'input')} />
       </div>
     </div>
    

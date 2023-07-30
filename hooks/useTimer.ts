@@ -10,23 +10,18 @@ interface Props {
 }
 
 const useTimer = ({ state, changeState }: Props) => {
-  const { timeWork, timeShortBreak, timeLongBreak } = useStore()
-  const [timer, setTimer] = useState<number>(timers[StateName.WORK])
+  const { timeWork, timeShortBreak, timeLongBreak, timer, changeTimer, tickTimer } = useStore()
 
   const [timerActive, setTimerActive] = useState<boolean>(false)
 
   const resetTimer = () => {
     if (state === StateName.WORK) {
-      setTimer(timeWork)
+      changeTimer(timeWork)
     } else if (state === StateName.SHORT_BREAK) {
-      setTimer(timeShortBreak)
+      changeTimer(timeShortBreak)
     } else if (state === StateName.LONG_BREAK) {
-      setTimer(timeLongBreak)
+      changeTimer(timeLongBreak)
     }
-  }
-
-  function tickTimer () {
-    setTimer(prevTimer => prevTimer - 1)
   }
 
   const toggleTimerActive = () => {

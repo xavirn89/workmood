@@ -10,7 +10,7 @@ function YoutubeEmbeds({ players, onReady }: Props): JSX.Element {
   return (
     <div className="hidden">
       {players.map((playerObject) => (
-        <div key={playerObject.id}>
+        <div id={playerObject.id}>
           <YouTube
             videoId={playerObject.videoId}
             opts={{

@@ -14,10 +14,11 @@ import useTimer from '@/hooks/useTimer'
 import usePlayers from '@/hooks/usePlayers'
 import AmbienceSection from '@/components/ui/AmbienceSection'
 import MainControls from '@/components/ui/MainControls'
+import { useStore } from '@/stores/globalStore'
 
-const Test = () => {
-  const [musicVolume, setMusicVolume] = useState<number>(50)
-  const [ambienceVolume, setAmbienceVolume] = useState<number>(25) 
+const Home = () => {
+  const { musicVolume, ambienceVolume, changeMusicVolume, changeAmbienceVolume } = useStore()
+
   const { 
     state, stateData, addPlayerIDToStateData, removePlayerIDFromStateData, changeState, 
   } = useAppState()
@@ -60,9 +61,9 @@ const Test = () => {
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>, playerType: 'input' | 'ambience') => {
     updatePlayersVolume(event, playerType)
     if (playerType === 'input') {
-        setMusicVolume(Number(event.target.value))
+      changeMusicVolume(Number(event.target.value))
     } else if (playerType === 'ambience') {
-        setAmbienceVolume(Number(event.target.value))
+      changeAmbienceVolume(Number(event.target.value))
     }
   }
 
@@ -115,4 +116,4 @@ const Test = () => {
   )
 }
 
-export default Test
+export default Home

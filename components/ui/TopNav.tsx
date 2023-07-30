@@ -67,7 +67,8 @@ function TopNav(): JSX.Element {
   }, [])
 
   return (<>
-    <div className='flex w-full justify-end pt-5'>
+    <div className='flex w-full justify-between pt-5'>
+      <p className='font-mono font-bold tracking-widest'>WorkMood</p>
       <label className="swap swap-rotate">
         <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} />
         <BsGear className="swap-on fill-current w-6 h-6" />

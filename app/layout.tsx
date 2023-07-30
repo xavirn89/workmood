@@ -1,24 +1,28 @@
+'use client'
 import './globals.css'
-import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { useStore } from '@/stores/globalStore'
+import { getTimeValue } from '@/utils/functions'
 
 const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Make your Pomodoro',
-  description: 'Make your Pomodoro as you like, with your own music and timers.',
-}
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { timer } = useStore()
+
   return (
     <html lang="en" data-theme="dark">
+      <head>
+        <title>{`${getTimeValue(timer, 'minutes')}:${getTimeValue(timer, 'seconds')}  - Work Mood`}</title>
+        <meta name="description" content="Customize your work schedule and ambience, with your own music and timers." />
+      </head>
       <body className={inter.className}>
         {children}
       </body>
     </html>
   )
 }
+
