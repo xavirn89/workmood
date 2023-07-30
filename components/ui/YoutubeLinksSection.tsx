@@ -1,11 +1,14 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import OnOffButton from '@/components/buttons/OnOffButton'
 import { AiFillYoutube } from "react-icons/ai"
 import YoutubeInput from '@/components/YoutubeInput'
 import { PlayerObject } from '@/types/mainTypes'
 import { extractYouTubeVideoId } from '@/utils/functions'
 import { StateName } from '@/utils/constants'
+import { TbSquareLetterW, TbSquareLetterS, TbSquareLetterL } from 'react-icons/tb'
+import { BiSolidVolumeMute } from 'react-icons/bi'
+import clsx from 'clsx'
 
 interface Props {
   musicVolume: number
@@ -18,6 +21,15 @@ interface Props {
 
 const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, addPlayerIDToStateData, createNewInputPlayer }: Props): JSX.Element => {
   const [showYoutubeModal, setShowYoutubeModal] = useState<boolean>(false)
+
+  const [inputState, setInputState] = useState<StateName | null>(null)
+  const [textDivInput, setTextDivInput] = useState<string | null>('')
+  const showInput = inputState !== null
+  const inputStateToText: string | undefined = inputState?.toString().replace(/\s/g, "")
+
+  useEffect(() => {
+    if (inputState) setTextDivInput(inputState)
+  }, [inputState])
 
   const handleInputClick = (playerID: string, inputURL: string, stateIndicator: StateName): void => {
     if (stateData[stateIndicator].players.includes(playerID)) return
@@ -32,77 +44,52 @@ const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, ad
     }
   }
 
-  useEffect(() => {
-    if (showYoutubeModal){
-      // @ts-ignore
-      window.modalYTInputs.showModal()
-
-      const firstInput = document.querySelector("#modalYTInputs input") as HTMLInputElement | null
-      firstInput && firstInput.blur()
-    }
-  }, [showYoutubeModal])
-
   return (<>
     <div className='flex flex-col w-full'>
+      <div className={clsx(
+        'px-4 py-2 bg-base-200 mb-2 rounded-2xl border-b-4 border-l-2 border-zinc-900 transition-all duration-200',
+        {
+          'translate-y-0 opacity-100': showInput,
+          'translate-y-20 opacity-0': !showInput
+        }
+      )}>
+        <p className='pb-2'>{textDivInput} - Youtube Video URL</p>
+        <YoutubeInput
+          playerID={inputStateToText}
+          functionOnClick={handleInputClick}
+          stateIndicator={inputState}
+          isReady={players.find(player => player.id === inputStateToText)?.ready || false}
+          playerTitle={players.find(player => player.id === inputStateToText)?.title || null}
+        />
+      </div>
+
       <div className='flex justify-end'>
         <OnOffButton 
-          icon={AiFillYoutube} 
+          icon={BiSolidVolumeMute} 
           functionToggle={() => setShowYoutubeModal((prev) => !prev)}
           isPushed={showYoutubeModal} 
         />
+        <OnOffButton 
+          icon={TbSquareLetterL} 
+          functionToggle={() => setInputState(inputState !== StateName.LONG_BREAK ? StateName.LONG_BREAK : null)}
+          isPushed={inputState === StateName.LONG_BREAK} 
+        />
+        <OnOffButton 
+          icon={TbSquareLetterS} 
+          functionToggle={() => setInputState(inputState !== StateName.SHORT_BREAK ? StateName.SHORT_BREAK : null)}
+          isPushed={inputState === StateName.SHORT_BREAK} 
+        />
+        <OnOffButton 
+          icon={TbSquareLetterW} 
+          functionToggle={() => setInputState(inputState !== StateName.WORK ? StateName.WORK : null)}
+          isPushed={inputState === StateName.WORK} 
+        />
       </div>
       <div className='flex justify-end'>
-        <input type="range" min={0} max="100" value={musicVolume} className="range range-xs w-32" onChange={(event) => onHandleMove(event, 'input')} />
+        <input type="range" min={0} max="100" value={musicVolume} className="range range-xs w-48" onChange={(event) => onHandleMove(event, 'input')} />
       </div>
     </div>
-
-    <dialog id="modalYTInputs" className="modal" onClose={() => setShowYoutubeModal((prev) => !prev)}>
-      <div className="modal-box flex flex-col">
-        <h3 className="font-bold text-lg text-center">Youtube Links</h3>
-        <div className="divider"></div> 
-        <p className="pb-4 text-center">Assign music videos to phases</p>
-
-        <div className="flex flex-col w-full px-4 mt-6 justify-center items-center">
-          
-          <div className='flex items-center mb-2'>
-            <YoutubeInput
-              placeholder="Work YouTube URL"
-              playerID="Work"
-              functionOnClick={handleInputClick}
-              stateIndicator={StateName.WORK}
-              isReady={players.find(player => player.id === "Work")?.ready || false}
-              playerTitle={players.find(player => player.id === "Work")?.title || null}
-            />
-          </div>
-
-          <div className='flex items-center mb-2'>
-            <YoutubeInput
-              placeholder="Short Break YouTube URL"
-              playerID="ShortBreak"
-              functionOnClick={handleInputClick}
-              stateIndicator={StateName.SHORT_BREAK}
-              isReady={players.find(player => player.id === "ShortBreak")?.ready || false}
-              playerTitle={players.find(player => player.id === "ShortBreak")?.title || null}
-            />
-          </div>
-
-          <div className='flex items-center mb-2'>
-            <YoutubeInput
-              placeholder="Long Break YouTube URL"
-              playerID="LongBreak"
-              functionOnClick={handleInputClick}
-              stateIndicator={StateName.LONG_BREAK}
-              isReady={players.find(player => player.id === "LongBreak")?.ready || false}
-              playerTitle={players.find(player => player.id === "LongBreak")?.title || null}
-            />
-          </div>
-        </div>
-
-      </div>
-      <form method="dialog" className="modal-backdrop">
-        <button>close</button>
-      </form>
-    </dialog>
+   
   </>)
 }
 export default YoutubeLinksSection

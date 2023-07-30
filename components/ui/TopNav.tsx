@@ -92,7 +92,7 @@ function TopNav(): JSX.Element {
               <input 
                 type="text" 
                 value={getTimeValue(tempTimeWork, 'minutes').toString()} 
-                className="input input-bordered" 
+                className="input input-bordered bg-slate-300 text-black pl-1" 
                 onChange={handleTimeInputChange(setTempTimeWork)} 
               />
             </label>
@@ -104,7 +104,7 @@ function TopNav(): JSX.Element {
               <input 
                 type="text" 
                 value={getTimeValue(tempTimeShortBreak, 'minutes').toString()} 
-                className="input input-bordered" 
+                className="input input-bordered bg-slate-300 text-black pl-1" 
                 onChange={handleTimeInputChange(setTempTimeShortBreak)} 
               />
             </label>
@@ -116,7 +116,7 @@ function TopNav(): JSX.Element {
               <input 
                 type="text" 
                 value={getTimeValue(tempTimeLongBreak, 'minutes').toString()} 
-                className="input input-bordered" 
+                className="input input-bordered bg-slate-300 text-black pl-1" 
                 onChange={handleTimeInputChange(setTempTimeLongBreak)} 
               />
             </label>
@@ -130,7 +130,7 @@ function TopNav(): JSX.Element {
               <input 
                 type="text" 
                 value={tempLongBreakInterval.toString()} 
-                className="input input-sm input-bordered w-14"
+                className="input input-sm input-bordered w-14 bg-slate-300 text-black pl-1"
                 onChange={(e) => {
                   const rounds = parseInt(e.target.value);
                   if (!isNaN(rounds) && rounds >= 0) {

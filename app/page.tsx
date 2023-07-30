@@ -72,17 +72,17 @@ const Test = () => {
   
   return (
     <main className='flex flex-col h-screen items-center'>
-      <div className='flex flex-col w-3/4'>
+      <div className='flex flex-col w-2/4'>
         <TopNav />
         <div className="divider"></div> 
       </div>
       
       <div className='flex flex-col flex-grow w-full'>
-        <div className='flex flex-col w-full items-center'>
+        <div className='flex flex-col w-full items-center pt-20'>
           <Timer state={state} timer={timer} />
         </div>
         <div className='flex flex-grow w-full justify-center'>
-          <div className='flex items-end pb-6 pr-3 w-60'>
+          <div className='flex items-end pb-6 pr-3 w-80'>
             <YoutubeLinksSection 
               musicVolume={musicVolume}
               onHandleMove={handleVolumeChange}
@@ -100,7 +100,7 @@ const Test = () => {
               changeState={changeState}
             />
           </div>
-          <div className='flex items-end pb-6 pl-3 w-60'>
+          <div className='flex items-end pb-6 pl-3 w-80'>
             <AmbienceSection 
               handleClickAmbience={handleClickAmbience} 
               currentPlayers={stateData[state]?.players}

@@ -5,17 +5,17 @@ import { BsCheck } from 'react-icons/bs'
 import { HiUpload } from 'react-icons/hi'
 import YoutubeInputButton from '@/components/buttons/YoutubeInputButton'
 import { StateName } from '@/utils/constants'
-import { truncateString } from '@/utils/functions'
 
 type YoutubeInputProps = {
-  playerID: string | undefined
+  placeholder: string
+  playerID: string
   functionOnClick: (playerID: string, inputURL: string, stateIndicator: StateName) => void
-  stateIndicator: StateName | null
+  stateIndicator: StateName
   isReady: boolean
   playerTitle: string | null
 }
 
-const YoutubeInput: FC<YoutubeInputProps> = ({ playerID, functionOnClick, stateIndicator, isReady = false, playerTitle }) => {
+const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOnClick, stateIndicator, isReady = false, playerTitle }) => {
   const [text, setText] = useState<string>('')
   const [videoId, setVideoId] = useState<string>('')
 
@@ -30,9 +30,11 @@ const YoutubeInput: FC<YoutubeInputProps> = ({ playerID, functionOnClick, stateI
       
       <div className="form-control">
         <label className="input-group input-group-md">
+          <span className='w-32'>{playerID}</span>
           <input 
             type="text" 
-            className="input input-bordered input-md bg-slate-200 text-black pl-1"
+            className="input input-bordered input-md"
+            placeholder={placeholder}
             value={text}
             onChange={(event) => {
               setText(event.target.value)
@@ -42,7 +44,7 @@ const YoutubeInput: FC<YoutubeInputProps> = ({ playerID, functionOnClick, stateI
             icon={HiUpload}
             pushedIcon={BsCheck}
             onClick={() => {
-              if (videoId !== '' && playerID && stateIndicator) {
+              if (videoId !== '') {
                 functionOnClick(playerID, text, stateIndicator)
               }
             }}
@@ -50,14 +52,9 @@ const YoutubeInput: FC<YoutubeInputProps> = ({ playerID, functionOnClick, stateI
           />
         </label>
       </div>
-      <p className='text-xs pt-1'>
-        {playerTitle
-          ? playerTitle.length > 40
-            ? `${playerTitle.substring(0, 40)}...`
-            : playerTitle
-          : "No Data"
-        }
-      </p>
+      <div className='flex h-8 pt-2 pl-2'>
+        {playerTitle ? <p className='text-xs'>{playerTitle}</p> : <p></p>}
+      </div>
 
     </div>
   )

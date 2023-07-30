@@ -13,12 +13,12 @@ interface Props {
 const MainControls = ({ timerActive, toggleTimerActive, resetTimer, changeState }: Props): JSX.Element => {
   return (<>
   
+    <Button type={1} icon={FaUndo} onClick={resetTimer} />
     {!timerActive ? (
       <Button type={1} icon={FaPlay} onClick={toggleTimerActive} />
     ) : (
       <Button type={1} icon={FaPause} onClick={toggleTimerActive} />
     )}
-    <Button type={1} icon={FaUndo} onClick={resetTimer} />
     <Button type={1} icon={FaForward} onClick={changeState} />
 
   </>)

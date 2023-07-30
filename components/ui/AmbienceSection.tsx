@@ -47,7 +47,7 @@ const AmbienceSection = ({ handleClickAmbience, currentPlayers, ambienceVolume, 
         />
       </div>
       
-      <input type="range" min={0} max="100" value={ambienceVolume} className="range range-xs scale-x-[-1]" onChange={(event) => handleVolumeChange(event, 'ambience')} />
+      <input type="range" min={0} max="100" value={ambienceVolume} className="range range-xs scale-x-[-1] w-48" onChange={(event) => handleVolumeChange(event, 'ambience')} />
     </div>
   </>)
 }
