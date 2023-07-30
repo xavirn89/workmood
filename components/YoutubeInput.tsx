@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { FC } from 'react'
 import { extractYouTubeVideoId } from '@/utils/functions'
-import { BsCheck, BsUpload } from 'react-icons/bs'
+import { BsCheck } from 'react-icons/bs'
+import { HiUpload } from 'react-icons/hi'
 import YoutubeInputButton from '@/components/buttons/YoutubeInputButton'
 import { StateName } from '@/utils/constants'
 
@@ -26,24 +27,21 @@ const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOn
 
   return (
     <div className="flex flex-col w-full">
-      <div className='flex'>
-        <div className='flex w-2/6'>
-          <p>{playerID}</p>
-        </div>
-        <div className='flex w-3/6'>
-          <input
-            type="text"
-            className="border-2 border-gray-600 rounded-lg bg-white shadow-sm text-black text-xs"
+      
+      <div className="form-control">
+        <label className="input-group input-group-md">
+          <span className='w-32'>{playerID}</span>
+          <input 
+            type="text" 
+            className="input input-bordered input-md"
             placeholder={placeholder}
             value={text}
             onChange={(event) => {
               setText(event.target.value)
             }}
           />
-        </div>
-        <div className='flex w-1/6'>
           <YoutubeInputButton
-            icon={BsUpload}
+            icon={HiUpload}
             pushedIcon={BsCheck}
             onClick={() => {
               if (videoId !== '') {
@@ -52,11 +50,12 @@ const YoutubeInput: FC<YoutubeInputProps> = ({ placeholder, playerID, functionOn
             }}
             readyFlag={isReady}
           />
-        </div>
+        </label>
       </div>
-      <div className='flex'>
-        {playerTitle && <div className='flex w-4/6 text-xs text-gray-400'>{playerTitle}</div>}
+      <div className='flex h-8 pt-2 pl-2'>
+        {playerTitle ? <p className='text-xs'>{playerTitle}</p> : <p></p>}
       </div>
+
     </div>
   )
 }

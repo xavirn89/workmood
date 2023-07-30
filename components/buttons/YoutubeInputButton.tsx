@@ -22,7 +22,7 @@ const YoutubeInputButton: FC<Props> = ({ icon: Icon, pushedIcon, onClick, readyF
 
   return (
     <button
-      className={`rounded px-4 py-2 m-1 border-b-4 border-l-2 shadow-lg ${buttonColor} ${buttonBorderColor} transform transition-all duration-200 ease-in-out active:scale-95 active:border-b-2`}
+      className={`rounded px-4 py-2 border-b-4 border-l-2 shadow-lg ${buttonColor} ${buttonBorderColor} transform transition-all duration-200 ease-in-out active:scale-95 active:border-b-2`}
       onClick={onClick}
     >
       {Icon && <Icon className={'text-black'} />}

@@ -19,10 +19,10 @@ const Test = () => {
   const [musicVolume, setMusicVolume] = useState<number>(50)
   const [ambienceVolume, setAmbienceVolume] = useState<number>(25) 
   const { 
-    state, stateData, longBreakInterval, addPlayerIDToStateData, removePlayerIDFromStateData, changeState, 
+    state, stateData, addPlayerIDToStateData, removePlayerIDFromStateData, changeState, 
   } = useAppState()
   const { 
-    timer, timeWork, timeShortBreak, timeLongBreak, timerActive, resetTimer, toggleTimerActive 
+    timer, timerActive, resetTimer, toggleTimerActive
   } = useTimer({ state, changeState })
   const {
     players, checkPlayersForCurrentState, handlePlayerReady, createNewInputPlayer, createNewAmbiencePlayer, updatePlayersVolume
@@ -71,55 +71,47 @@ const Test = () => {
   }, [stateData[state].players, timerActive, state])
   
   return (
-    <main className='flex flex-col h-screen justify-between py-8'>
-      <div className='flex flex-col items-end px-32'>
-        {/* @ts-ignore */}
-        <TopNav 
-          timeWork={timeWork}
-          timeShortBreak={timeShortBreak}
-          timeLongBreak={timeLongBreak}
-          longBreakInterval={longBreakInterval}
-        />
+    <main className='flex flex-col h-screen items-center'>
+      <div className='flex flex-col w-3/4'>
+        <TopNav />
+        <div className="divider"></div> 
       </div>
-
-      <div className='flex flex-col items-center'>
-        <Timer state={state} timer={timer} />
-      </div>
-
-      <div className="flex mt-3 justify-center items-center">
-
-        <div className='flex w-1/3 justify-end'>
-          <YoutubeLinksSection 
-            musicVolume={musicVolume}
-            onHandleMove={handleVolumeChange}
-            players={players.filter(player => player.type === 'input')}
-            stateData={stateData}
-            addPlayerIDToStateData={addPlayerIDToStateData}
-            createNewInputPlayer={createNewInputPlayer}
-          />
+      
+      <div className='flex flex-col flex-grow w-full'>
+        <div className='flex flex-col w-full items-center'>
+          <Timer state={state} timer={timer} />
         </div>
-        <div className='flex justify-center'>
-          <MainControls
-            timerActive={timerActive}
-            toggleTimerActive={toggleTimerActive}
-            resetTimer={resetTimer}
-            changeState={changeState}
-          />
-        </div>
-        <div className='flex w-1/3 justify-start'>
-          <AmbienceSection 
-            handleClickAmbience={handleClickAmbience} 
-            currentPlayers={stateData[state]?.players}
-            ambienceVolume={ambienceVolume}
-            handleVolumeChange={handleVolumeChange}
-          />
-        </div>
-        
+        <div className='flex flex-grow w-full justify-center'>
+          <div className='flex items-end pb-6 pr-3 w-60'>
+            <YoutubeLinksSection 
+              musicVolume={musicVolume}
+              onHandleMove={handleVolumeChange}
+              players={players.filter(player => player.type === 'input')}
+              stateData={stateData}
+              addPlayerIDToStateData={addPlayerIDToStateData}
+              createNewInputPlayer={createNewInputPlayer}
+            />
+          </div>
+          <div className='flex items-end justify-center pb-10'>
+            <MainControls
+              timerActive={timerActive}
+              toggleTimerActive={toggleTimerActive}
+              resetTimer={resetTimer}
+              changeState={changeState}
+            />
+          </div>
+          <div className='flex items-end pb-6 pl-3 w-60'>
+            <AmbienceSection 
+              handleClickAmbience={handleClickAmbience} 
+              currentPlayers={stateData[state]?.players}
+              ambienceVolume={ambienceVolume}
+              handleVolumeChange={handleVolumeChange}
+            />
+          </div>
+        </div>   
       </div>
       <YoutubeEmbeds players={players} onReady={handlePlayerReady} />
     </main>
-
-    
   )
 }
 

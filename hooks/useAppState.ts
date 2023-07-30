@@ -4,9 +4,12 @@ import { useState, useEffect } from 'react'
 import { StateName } from '@/utils/constants'
 import { StateObject } from '@/types/mainTypes'
 
+import { useStore } from "@/stores/globalStore"
+
 const useAppState = () => {
   const [state, setState] = useState<StateName>(StateName.WORK)
-  const [longBreakInterval, setLongBreakInterval] = useState<number>(3)
+  const { longBreakInterval } = useStore()
+  const [round, setRound] = useState<number>(0)
 
   const [stateData, setStateData] = useState<Record<string, StateObject>>({
     [StateName.WORK]: {
@@ -24,7 +27,6 @@ const useAppState = () => {
   })
 
   function addPlayerIDToStateData (playerID: string, state: StateName): void {
-    /* en stateData[state].players, añadir un elemento con el valor de playerID */
     setStateData(prevStateData => ({
       ...prevStateData,
       [state]: {
@@ -35,7 +37,6 @@ const useAppState = () => {
   }
 
   function removePlayerIDFromStateData (buttonPlayerId: string, state: StateName): void {
-    /* en stateData[state].players, eliminar el elemento que tenga el mismo valor que playerID */
     setStateData(prevStateData => ({
       ...prevStateData,
       [state]: {
@@ -47,15 +48,23 @@ const useAppState = () => {
 
   const changeState = (): void => {
     if (state === StateName.WORK) {
-      setState(StateName.SHORT_BREAK)
+      if (round === longBreakInterval) {
+        setRound(0)
+        setState(StateName.LONG_BREAK)
+      } else {
+        setState(StateName.SHORT_BREAK)
+      }
     } else if (state === StateName.SHORT_BREAK) {
-      setState(StateName.LONG_BREAK)
+      if (round < longBreakInterval) {
+        setRound(round + 1)
+      }
+      setState(StateName.WORK)
     } else if (state === StateName.LONG_BREAK) {
       setState(StateName.WORK)
     }
   }
 
 
-  return { state, stateData, addPlayerIDToStateData, removePlayerIDFromStateData, changeState, longBreakInterval }
+  return { state, stateData, addPlayerIDToStateData, removePlayerIDFromStateData, changeState }
 }
 export default useAppState

@@ -36,22 +36,34 @@ const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, ad
     if (showYoutubeModal){
       // @ts-ignore
       window.modalYTInputs.showModal()
+
+      const firstInput = document.querySelector("#modalYTInputs input") as HTMLInputElement | null
+      firstInput && firstInput.blur()
     }
   }, [showYoutubeModal])
 
   return (<>
-    <OnOffButton 
-      icon={AiFillYoutube} 
-      functionToggle={() => setShowYoutubeModal((prev) => !prev)}
-      isPushed={showYoutubeModal} 
-    />
-    <input type="range" min={0} max="100" value={musicVolume} className="range range-xs" onChange={(event) => onHandleMove(event, 'input')} />
-    <dialog id="modalYTInputs" className="modal" onClose={() => setShowYoutubeModal((prev) => !prev)}>
-      <div className="modal-box flex flex-col items-center">
-        <h3 className="font-bold text-lg">Youtube Links</h3>
-        <p className="py-4">Assign music videos to phases</p>
+    <div className='flex flex-col w-full'>
+      <div className='flex justify-end'>
+        <OnOffButton 
+          icon={AiFillYoutube} 
+          functionToggle={() => setShowYoutubeModal((prev) => !prev)}
+          isPushed={showYoutubeModal} 
+        />
+      </div>
+      <div className='flex justify-end'>
+        <input type="range" min={0} max="100" value={musicVolume} className="range range-xs w-32" onChange={(event) => onHandleMove(event, 'input')} />
+      </div>
+    </div>
 
-        <div className="flex flex-col w-full px-4 mt-10">
+    <dialog id="modalYTInputs" className="modal" onClose={() => setShowYoutubeModal((prev) => !prev)}>
+      <div className="modal-box flex flex-col">
+        <h3 className="font-bold text-lg text-center">Youtube Links</h3>
+        <div className="divider"></div> 
+        <p className="pb-4 text-center">Assign music videos to phases</p>
+
+        <div className="flex flex-col w-full px-4 mt-6 justify-center items-center">
+          
           <div className='flex items-center mb-2'>
             <YoutubeInput
               placeholder="Work YouTube URL"

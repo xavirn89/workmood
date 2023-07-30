@@ -12,6 +12,7 @@ interface Props {
 
 const MainControls = ({ timerActive, toggleTimerActive, resetTimer, changeState }: Props): JSX.Element => {
   return (<>
+  
     {!timerActive ? (
       <Button type={1} icon={FaPlay} onClick={toggleTimerActive} />
     ) : (
@@ -19,6 +20,7 @@ const MainControls = ({ timerActive, toggleTimerActive, resetTimer, changeState 
     )}
     <Button type={1} icon={FaUndo} onClick={resetTimer} />
     <Button type={1} icon={FaForward} onClick={changeState} />
+
   </>)
 }
 export default MainControls

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 
 import { StateName, timers } from '@/utils/constants'
+import { useStore } from "@/stores/globalStore"
 
 interface Props {
   state: StateName
@@ -9,9 +10,7 @@ interface Props {
 }
 
 const useTimer = ({ state, changeState }: Props) => {
-  const [timeWork, setTimeWork] = useState<number>(timers[StateName.WORK])
-  const [timeShortBreak, setTimeShortBreak] = useState<number>(timers[StateName.SHORT_BREAK])
-  const [timeLongBreak, setTimeLongBreak] = useState<number>(timers[StateName.LONG_BREAK])
+  const { timeWork, timeShortBreak, timeLongBreak } = useStore()
   const [timer, setTimer] = useState<number>(timers[StateName.WORK])
 
   const [timerActive, setTimerActive] = useState<boolean>(false)
@@ -36,7 +35,7 @@ const useTimer = ({ state, changeState }: Props) => {
 
   useEffect(() => {
     resetTimer()
-  }, [state])
+  }, [state, timeWork, timeShortBreak, timeLongBreak])
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
@@ -54,6 +53,6 @@ const useTimer = ({ state, changeState }: Props) => {
     return () => clearInterval(interval!)
   }, [timerActive])
 
-  return { timer, timeWork, timeShortBreak, timeLongBreak, timerActive, resetTimer, tickTimer, toggleTimerActive }
+  return { timer, timerActive, resetTimer, tickTimer, toggleTimerActive }
 }
 export default useTimer
