@@ -91,13 +91,16 @@ const usePlayers = ({ stateData, state, musicVolume, ambienceVolume, timerActive
       updatePlayersVolume(event, 'ambience')
       updatePlayersVolume(event, 'input')
     } else {
-      let event = {
+      let eventambience = {
         target: { value: String(ambienceVolume) }
       } as React.ChangeEvent<HTMLInputElement>
-      updatePlayersVolume(event, 'ambience')
-      updatePlayersVolume(event, 'input')
+      let eventinput = {
+        target: { value: String(musicVolume) }
+      } as React.ChangeEvent<HTMLInputElement>
+      updatePlayersVolume(eventambience, 'ambience')
+      updatePlayersVolume(eventinput, 'input')
     }
-  }, [mute, ambienceVolume, updatePlayersVolume])
+  }, [mute, updatePlayersVolume])
 
   return { players, checkPlayersForCurrentState, handlePlayerReady, createNewPlayer, updatePlayersVolume }
 }
