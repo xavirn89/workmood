@@ -1,5 +1,5 @@
 export const timers: Record<string, number> = {
-  "Work": 25 * 60,
+  "Work": 12,
   "Short Break": 5 * 60,
   "Long Break": 15 * 60
 }

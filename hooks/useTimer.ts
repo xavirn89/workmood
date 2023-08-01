@@ -12,7 +12,6 @@ interface Props {
 const useTimer = ({ state, changeState }: Props) => {
   const { timeWork, timeShortBreak, timeLongBreak, timer, changeTimer, tickTimer } = useStore()
   const [timerActive, setTimerActive] = useState<boolean>(false)
-  const audioRef = useRef(new Audio('/sounds/ding.mp3'))
 
   const resetTimer = () => {
     const times = {
@@ -50,9 +49,6 @@ const useTimer = ({ state, changeState }: Props) => {
   }, [timerActive, timer])
 
   useEffect(() => {
-    if (timer === 10 || timer < 4) {
-      audioRef.current.play()
-    }
     if (timer < 0) {
       changeState()
     }

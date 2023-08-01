@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { ambiencesURLs } from '@/utils/constants'
 import { extractYouTubeVideoId } from '@/utils/functions'
 
@@ -15,8 +15,8 @@ import MainControls from '@/components/MainControls'
 import { useStore } from '@/stores/globalStore'
 
 const Home = () => {
+  const audioRef = useRef<HTMLAudioElement>(null)
   const { musicVolume, ambienceVolume, changeMusicVolume, changeAmbienceVolume } = useStore()
-
   const { 
     state, stateData, addPlayerIDToStateData, removePlayerIDFromStateData, changeState, 
   } = useAppState()
@@ -56,6 +56,12 @@ const Home = () => {
   useEffect(() => {
     checkPlayersForCurrentState()
   }, [stateData[state].players, timerActive, state])
+
+  useEffect(() => {
+    if (timer === 10 || timer < 4) {
+      if (audioRef.current) audioRef.current.play()
+    }
+  }, [timer])
 
   return (
     <main className='flex flex-col h-screen items-center'>
@@ -98,6 +104,7 @@ const Home = () => {
         </div>   
       </div>
       <YoutubeEmbeds players={players} onReady={handlePlayerReady} />
+      <audio ref={audioRef} src={'/sounds/ding.mp3'} />
     </main>
   )
 }
