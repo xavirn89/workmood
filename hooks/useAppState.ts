@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { StateName } from '@/utils/constants'
 import { StateObject } from '@/types/mainTypes'
@@ -26,24 +26,18 @@ const useAppState = () => {
     }
   })
 
-  function addPlayerIDToStateData (playerID: string, state: StateName): void {
-    setStateData(prevStateData => ({
-      ...prevStateData,
-      [state]: {
-        ...prevStateData[state],
-        players: [...prevStateData[state].players, playerID]
-      }
-    }))
+  const addPlayerIDToStateData = (playerID: string, state: StateName): void => {
+    setStateData(prevStateData => {
+      const updatedPlayers = [...prevStateData[state].players, playerID]
+      return { ...prevStateData, [state]: { ...prevStateData[state], players: updatedPlayers } }
+    })
   }
 
-  function removePlayerIDFromStateData (buttonPlayerId: string, state: StateName): void {
-    setStateData(prevStateData => ({
-      ...prevStateData,
-      [state]: {
-        ...prevStateData[state],
-        players: prevStateData[state].players.filter(player => player !== buttonPlayerId)
-      }
-    }))
+  const removePlayerIDFromStateData = (buttonPlayerId: string, state: StateName): void => {
+    setStateData(prevStateData => {
+      const updatedPlayers = prevStateData[state].players.filter(player => player !== buttonPlayerId)
+      return { ...prevStateData, [state]: { ...prevStateData[state], players: updatedPlayers } }
+    })
   }
 
   const changeState = (): void => {

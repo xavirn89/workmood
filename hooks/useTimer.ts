@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import { StateName, timers } from '@/utils/constants'
 import { useStore } from "@/stores/globalStore"
@@ -11,17 +11,17 @@ interface Props {
 
 const useTimer = ({ state, changeState }: Props) => {
   const { timeWork, timeShortBreak, timeLongBreak, timer, changeTimer, tickTimer } = useStore()
-
   const [timerActive, setTimerActive] = useState<boolean>(false)
+  const audioRef = useRef(new Audio('/sounds/ding.mp3'))
 
   const resetTimer = () => {
-    if (state === StateName.WORK) {
-      changeTimer(timeWork)
-    } else if (state === StateName.SHORT_BREAK) {
-      changeTimer(timeShortBreak)
-    } else if (state === StateName.LONG_BREAK) {
-      changeTimer(timeLongBreak)
+    const times = {
+      [StateName.WORK]: timeWork,
+      [StateName.SHORT_BREAK]: timeShortBreak,
+      [StateName.LONG_BREAK]: timeLongBreak
     }
+
+    changeTimer(times[state])
   }
 
   const toggleTimerActive = () => {
@@ -39,15 +39,26 @@ const useTimer = ({ state, changeState }: Props) => {
       interval = setInterval(() => {
         tickTimer()
       }, 1000)
-    } else if (!timerActive && timer !== 0) {
+    } else {
       clearInterval(interval!)
-    } else if (!timerActive && timer === 0) {
-      changeState()
+      if (timer === 0) {
+        changeState()
+      }
     }
 
     return () => clearInterval(interval!)
-  }, [timerActive])
+  }, [timerActive, timer])
+
+  useEffect(() => {
+    if (timer === 10 || timer < 4) {
+      audioRef.current.play()
+    }
+    if (timer < 0) {
+      changeState()
+    }
+  }, [timer])
 
   return { timer, timerActive, resetTimer, tickTimer, toggleTimerActive }
 }
+
 export default useTimer

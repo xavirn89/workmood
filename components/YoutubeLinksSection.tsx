@@ -1,8 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
-import OnOffButton from '@/components/buttons/OnOffButton'
-import { AiFillYoutube } from "react-icons/ai"
-import YoutubeInput from '@/components/YoutubeInput'
+import OnOffButton from '@/components/ui/OnOffButton'
+import YoutubeInput from '@/components/youtubesection/YoutubeInput'
 import { PlayerObject } from '@/types/mainTypes'
 import { extractYouTubeVideoId } from '@/utils/functions'
 import { StateName } from '@/utils/constants'
@@ -17,10 +16,10 @@ interface Props {
   players: PlayerObject[]
   stateData: any
   addPlayerIDToStateData: (playerID: string, state: StateName) => void
-  createNewInputPlayer: (playerID: string, videoId: string) => void
+  createNewPlayer: (playerID: string, videoId: string, type: 'input' | 'ambience') => void
 }
 
-const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, addPlayerIDToStateData, createNewInputPlayer }: Props): JSX.Element => {
+const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, addPlayerIDToStateData, createNewPlayer }: Props): JSX.Element => {
   const { mute, toggleMute } = useStore()
 
   const [inputState, setInputState] = useState<StateName | null>(null)
@@ -38,7 +37,7 @@ const YoutubeLinksSection = ({ musicVolume, onHandleMove, players, stateData, ad
     const videoId = extractYouTubeVideoId(value)
     if (!videoId || videoId === '') return
 
-    createNewInputPlayer(playerID, videoId)
+    createNewPlayer(playerID, videoId, 'input')
 
     if (!stateData[stateIndicator].players.includes(playerID)) {
       addPlayerIDToStateData(playerID, stateIndicator)

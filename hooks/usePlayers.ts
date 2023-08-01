@@ -1,6 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { PlayerObject } from '@/types/mainTypes'
+import { useStore } from "@/stores/globalStore"
 
 interface Props {
   stateData: Record<string, any>
@@ -12,102 +13,93 @@ interface Props {
 
 const usePlayers = ({ stateData, state, musicVolume, ambienceVolume, timerActive }: Props) => {
   const [players, setPlayers] = useState<PlayerObject[]>([])
+  const { mute } = useStore()
 
-  const playVideos = (playerIDs: string[]) => {
-    let newPlayers = [...players]
-    newPlayers = newPlayers.map(player => {
-        if (!playerIDs.includes(player.id)) {
-            return player
-        }
-        if (player.ready) {
-            (player.player as any)?.playVideo()
-            return {...player, isPlaying: true}
-        }
+  const toggleVideoPlayback = useCallback((playerIDs: string[], shouldPlay: boolean) => {
+    setPlayers(players => players.map(player => {
+      if (!playerIDs.includes(player.id) || !player.ready) {
         return player
-    })
-    setPlayers(newPlayers)
-  }
+      }
 
-  
-  const pauseVideos = (playerIDs: string[]) => {
-    let newPlayers = [...players]
-    newPlayers = newPlayers.map(player => {
-        if (!playerIDs.includes(player.id)) {
-            return player
-        }
-        if (player.ready) {
-            (player.player as any)?.pauseVideo()
-            return {...player, isPlaying: false}
-        }
-        return player
-    })
-    setPlayers(newPlayers)
-  }
+      (player.player as any)?.[shouldPlay ? 'playVideo' : 'pauseVideo']()
 
-  const checkPlayersForCurrentState = () => {
-    const playersIDsToPlay: string[] = stateData[state].players
-    const playersToPause = players.filter(player => !playersIDsToPlay.includes(player.id))
-    const playersIDsToPause: string[] = playersToPause.map(player => player.id)
+      return {...player, isPlaying: shouldPlay}
+    }))
+  }, [])
 
-    if (!timerActive) {
-      const allPlayersIDs = players.map(player => player.id)
-      pauseVideos(allPlayersIDs)
-    } else {
-      playVideos(playersIDsToPlay)
-      pauseVideos(playersIDsToPause)
+  const checkPlayersForCurrentState = useCallback(() => {
+    const playerIDsToPlay: string[] = stateData[state].players
+    const playerIDsToPause: string[] = players
+      .filter(player => !playerIDsToPlay.includes(player.id))
+      .map(player => player.id)
+
+    toggleVideoPlayback(players.map(player => player.id), timerActive)
+    if (timerActive) {
+      toggleVideoPlayback(playerIDsToPause, false)
     }
-  }
+  }, [stateData, state, players, timerActive, toggleVideoPlayback])
 
-  const handlePlayerReady = (playerID: string, event: { target: any }): void => {
-    const newPlayers = [...players]
-    const index = newPlayers.findIndex(player => player.id === playerID)
-    const newVolume = newPlayers[index].type === 'input' ? musicVolume : ambienceVolume
-    event.target.setVolume(newVolume)
-    newPlayers[index].player = event.target
-    newPlayers[index].ready = true
-    newPlayers[index].title = event.target.getVideoData().title
-    setPlayers(newPlayers)
+  const handlePlayerReady = useCallback((playerID: string, event: { target: any }): void => {
+    setPlayers(players => players.map(player => {
+      if (player.id !== playerID) {
+        return player
+      }
+
+      const newVolume = player.type === 'input' ? musicVolume : ambienceVolume
+      event.target.setVolume(newVolume)
+
+      return {
+        ...player,
+        player: event.target,
+        ready: true,
+        title: event.target.getVideoData().title
+      }
+    }))
+
     checkPlayersForCurrentState()
-  }
+  }, [musicVolume, ambienceVolume, checkPlayersForCurrentState])
 
-  const createNewInputPlayer = (playerID: string, videoId: string): void => {
-    const newPlayers = [...players]
-    newPlayers.push({
+  const createNewPlayer = useCallback((playerID: string, videoId: string, type: 'input' | 'ambience'): void => {
+    setPlayers(players => [...players, {
       player: null,
       isPlaying: false,
-      videoId: videoId,
+      videoId,
       title: '',
       ready: false,
       id: playerID,
-      type: 'input'
-    })
-    setPlayers(newPlayers)
-  }
+      type
+    }])
+  }, [])
 
-  const createNewAmbiencePlayer = (buttonPlayerId: string, videoId: string): void => {
-    const newPlayers = [...players]
-    newPlayers.push({
-      player: null,
-      isPlaying: false,
-      videoId: videoId,
-      title: '',
-      ready: false,
-      id: buttonPlayerId,
-      type: 'ambience'
-    })
-    setPlayers(newPlayers)
-  }
-
-  function updatePlayersVolume (event: React.ChangeEvent<HTMLInputElement>, playerType: 'input' | 'ambience') {
-    const newPlayers = [...players]
-    newPlayers.forEach(player => {
-      if (player.type === playerType) {
-        (player.player as any)?.setVolume(Number(event.target.value))
+  const updatePlayersVolume = useCallback((event: React.ChangeEvent<HTMLInputElement>, playerType: 'input' | 'ambience') => {
+    setPlayers(players => players.map(player => {
+      if (player.type !== playerType) {
+        return player
       }
-    })
-    setPlayers(newPlayers)
-  }
 
-  return { players, checkPlayersForCurrentState, handlePlayerReady, createNewInputPlayer, createNewAmbiencePlayer, updatePlayersVolume }
+      (player.player as any)?.setVolume(Number(event.target.value))
+
+      return player
+    }))
+  }, [])
+
+  useEffect(() => {  
+    if (mute) {
+      let event = {
+        target: { value: '0' }
+      } as React.ChangeEvent<HTMLInputElement>
+      updatePlayersVolume(event, 'ambience')
+      updatePlayersVolume(event, 'input')
+    } else {
+      let event = {
+        target: { value: String(ambienceVolume) }
+      } as React.ChangeEvent<HTMLInputElement>
+      updatePlayersVolume(event, 'ambience')
+      updatePlayersVolume(event, 'input')
+    }
+  }, [mute, ambienceVolume, updatePlayersVolume])
+
+  return { players, checkPlayersForCurrentState, handlePlayerReady, createNewPlayer, updatePlayersVolume }
 }
+
 export default usePlayers

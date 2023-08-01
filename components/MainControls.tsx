@@ -1,7 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
-import Button from '../Button'
 import { FaPlay, FaPause, FaUndo, FaForward } from 'react-icons/fa'
+import ButtonMain from '@/components/maincontrols/ButtonMain'
 
 interface Props {
   timerActive: boolean
@@ -13,13 +12,13 @@ interface Props {
 const MainControls = ({ timerActive, toggleTimerActive, resetTimer, changeState }: Props): JSX.Element => {
   return (<>
   
-    <Button type={1} icon={FaUndo} onClick={resetTimer} />
+    <ButtonMain icon={FaUndo} onClick={resetTimer} />
     {!timerActive ? (
-      <Button type={1} icon={FaPlay} onClick={toggleTimerActive} />
+      <ButtonMain icon={FaPlay} onClick={toggleTimerActive} />
     ) : (
-      <Button type={1} icon={FaPause} onClick={toggleTimerActive} />
+      <ButtonMain icon={FaPause} onClick={toggleTimerActive} />
     )}
-    <Button type={1} icon={FaForward} onClick={changeState} />
+    <ButtonMain icon={FaForward} onClick={changeState} />
 
   </>)
 }

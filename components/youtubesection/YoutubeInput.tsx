@@ -3,7 +3,7 @@ import { FC } from 'react'
 import { extractYouTubeVideoId } from '@/utils/functions'
 import { BsCheck } from 'react-icons/bs'
 import { HiUpload } from 'react-icons/hi'
-import YoutubeInputButton from '@/components/buttons/YoutubeInputButton'
+import YoutubeInputButton from '@/components/youtubesection/YoutubeInputButton'
 import { StateName } from '@/utils/constants'
 import { truncateString } from '@/utils/functions'
 

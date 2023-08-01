@@ -1,10 +1,8 @@
-'use client'
-import { useState, useEffect } from 'react'
 import { IoThunderstormSharp, IoCloudyNight } from 'react-icons/io5'
 import { GiBigWave } from 'react-icons/gi'
 import { MdForest } from 'react-icons/md'
 
-import Button from '../Button'
+import Button from './ui/Button'
 import { useStore } from '@/stores/globalStore'
 
 interface Props {
